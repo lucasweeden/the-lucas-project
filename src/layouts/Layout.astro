@@ -28,6 +28,44 @@ const { title = "Lucas Weeden — Builder · Operator · Creator" } = Astro.prop
 </head>
 <body>
   <slot />
+
+  <!-- Change 5: Coin clink sound on load. Change 6: No public/audio/background.mp3 found — skipped -->
+  <script is:inline>
+    function playCoinSound() {
+      try {
+        var ctx = new (window.AudioContext || window.webkitAudioContext)();
+        for (var i = 0; i < 10; i++) {
+          (function(idx) {
+            var delay = idx * 0.08 + Math.random() * 0.12;
+            setTimeout(function() {
+              var osc = ctx.createOscillator();
+              var gain = ctx.createGain();
+              var filter = ctx.createBiquadFilter();
+              osc.frequency.value = 2800 + Math.random() * 1400;
+              osc.type = 'sine';
+              filter.type = 'highpass';
+              filter.frequency.value = 1800;
+              gain.gain.setValueAtTime(0, ctx.currentTime);
+              gain.gain.linearRampToValueAtTime(0.25, ctx.currentTime + 0.003);
+              gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.18);
+              osc.connect(filter);
+              filter.connect(gain);
+              gain.connect(ctx.destination);
+              osc.start(ctx.currentTime);
+              osc.stop(ctx.currentTime + 0.2);
+            }, delay * 1000);
+          })(i);
+        }
+      } catch(e) {}
+    }
+    document.addEventListener('click', function initAudio() {
+      playCoinSound();
+      document.removeEventListener('click', initAudio);
+    }, { once: true });
+    window.addEventListener('load', function() {
+      setTimeout(function() { try { playCoinSound(); } catch(e) {} }, 2800);
+    });
+  </script>
 </body>
 </html>
 

@@ -22,31 +22,16 @@ const socials = [
   <Nav />
   <CustomCursor />
 
-  <main style="position: relative; z-index: 2; padding-top: 120px; min-height: 80vh;">
-    <section class="site-section" id="resources">
-      <div class="section-inner" style="text-align: center;">
-        <div class="section-label">09 — Resources</div>
-        <h2 class="section-title">RESOURCES</h2>
+  <!-- Home button — fixed top-left -->
+  <a href="/" id="home-btn" style="position:fixed;top:16px;left:16px;z-index:10000;background:#3a7a2a;color:#e8f5e0;border-radius:24px;padding:8px 18px;font-family:'Syne',sans-serif;font-size:13px;letter-spacing:1px;text-decoration:none;font-weight:600;transition:background 0.2s ease;">← Home</a>
 
-        <div style="display: inline-flex; align-items: center; gap: 12px; margin-bottom: 40px; padding: 12px 20px; border: 1px solid var(--border); border-radius: 8px; background: var(--card-bg);">
-          <span id="resource-url" style="font-family: 'Syne', sans-serif; font-size: 14px; letter-spacing: 0.05em; color: var(--text); user-select: all;">lucasweeden.com/resources</span>
-          <button id="copy-link-btn" style="font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; padding: 8px 16px; border: 1px solid var(--accent); background: transparent; color: var(--accent); border-radius: 4px; transition: all 0.3s ease;">Copy Link</button>
-        </div>
+  <main style="position: relative; z-index: 2; min-height: 100vh;">
 
-        <p style="font-size: 20px; opacity: 0.8; max-width: 500px; margin: 0 auto 20px;">
-          Collabs, podcasts, brand deals, or just say what's up.
-        </p>
-        <a href="mailto:Lucasproject@lucasweeden.com" class="contact-email-btn">
-          Lucasproject@lucasweeden.com
-        </a>
-      </div>
-    </section>
-
-    <!-- Follow The Journey — moved from main page -->
-    <section class="site-section" id="social">
+    <!-- SECTION A: Follow The Journey — first thing visible -->
+    <section class="site-section" id="social" style="min-height:100vh;display:flex;align-items:center;">
       <div class="section-inner">
-        <div class="section-label">Stay Connected</div>
-        <h2 class="section-title">FOLLOW THE JOURNEY</h2>
+        <div class="section-label" style="text-align:center;">Stay Connected</div>
+        <h2 class="section-title" style="text-align:center;">FOLLOW THE JOURNEY</h2>
         <div class="social-grid">
           {socials.map((s) => (
             <a href={s.url} target="_blank" rel="noopener" class="social-card" data-anim={s.anim}>
@@ -60,12 +45,51 @@ const socials = [
         </div>
       </div>
     </section>
+
+    <!-- SECTION B: Resources -->
+    <section class="site-section" id="resources">
+      <div class="section-inner" style="text-align: center;">
+        <div class="section-label">09 — Resources</div>
+        <h2 class="section-title">RESOURCES</h2>
+
+        <div style="display: inline-flex; align-items: center; gap: 12px; margin-bottom: 40px; padding: 12px 20px; border: 1px solid var(--border); border-radius: 8px; background: var(--card-bg);">
+          <span style="font-family: 'Syne', sans-serif; font-size: 14px; letter-spacing: 0.05em; color: var(--text); user-select: all;">lucasweeden.com/resources</span>
+          <button id="copy-link-btn" style="font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; padding: 8px 16px; border: 1px solid var(--accent); background: transparent; color: var(--accent); border-radius: 4px; transition: all 0.3s ease;">Copy Link</button>
+        </div>
+
+        <!-- Resource cards -->
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px;max-width:800px;margin:0 auto 48px;text-align:left;">
+          <div class="card" style="padding:24px;">
+            <div class="card-title" style="font-size:20px;">Collabs</div>
+            <div class="card-body">Open to brand collaborations and partnerships.</div>
+          </div>
+          <div class="card" style="padding:24px;">
+            <div class="card-title" style="font-size:20px;">Podcasts</div>
+            <div class="card-body">Book Lucas for podcast appearances.</div>
+          </div>
+          <div class="card" style="padding:24px;">
+            <div class="card-title" style="font-size:20px;">Brand Deals</div>
+            <div class="card-body">Reach out about sponsorships and brand deals.</div>
+          </div>
+        </div>
+
+        <a href="mailto:Lucasproject@lucasweeden.com" class="contact-email-btn">
+          Lucasproject@lucasweeden.com
+        </a>
+      </div>
+    </section>
+
+    <!-- Scroll-to-home trap zone -->
+    <div id="scroll-trap" style="height:300vh;position:relative;">
+      <div id="back-home-hint" style="position:sticky;top:50%;text-align:center;font-family:'Syne',sans-serif;font-size:18px;color:var(--accent);opacity:0;transition:opacity 0.5s ease;letter-spacing:0.1em;">← Back to Home</div>
+    </div>
   </main>
 
   <Footer />
 </Layout>
 
 <script>
+  // Copy link
   document.getElementById('copy-link-btn')?.addEventListener('click', () => {
     navigator.clipboard.writeText('https://lucasweeden.com/resources').then(() => {
       const btn = document.getElementById('copy-link-btn');
@@ -73,16 +97,56 @@ const socials = [
     });
   });
 
-  // Activate social card animations when scrolled into view
+  // Social card animations
   const socialGrid = document.querySelector('.social-grid');
   if (socialGrid) {
-    const observer = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) {
-        socialGrid.querySelectorAll('.social-card').forEach((card, i) => {
-          setTimeout(() => card.classList.add('anim-active'), i * 100);
-        });
-      }
-    }, { threshold: 0.3 });
-    observer.observe(socialGrid);
+    // Activate immediately since it's above the fold
+    socialGrid.querySelectorAll('.social-card').forEach((card, i) => {
+      setTimeout(() => card.classList.add('anim-active'), i * 100 + 500);
+    });
   }
+
+  // Scroll-to-home trap
+  const trap = document.getElementById('scroll-trap');
+  const hint = document.getElementById('back-home-hint');
+  let scrollTicks = 0;
+  let trapActive = false;
+
+  if (trap) {
+    const obs = new IntersectionObserver(([entry]) => {
+      trapActive = entry.isIntersecting;
+      if (!trapActive) scrollTicks = 0;
+    }, { threshold: 0.05 });
+    obs.observe(trap);
+  }
+
+  window.addEventListener('scroll', () => {
+    if (hint) {
+      const trapRect = trap?.getBoundingClientRect();
+      if (trapRect && trapRect.top < window.innerHeight) {
+        const progress = Math.min(1, (window.innerHeight - trapRect.top) / (trapRect.height * 0.3));
+        hint.style.opacity = String(Math.min(progress, 0.8));
+      } else {
+        hint.style.opacity = '0';
+      }
+    }
+  });
+
+  window.addEventListener('wheel', (e) => {
+    if (trapActive && e.deltaY > 0) {
+      scrollTicks++;
+      if (scrollTicks >= 3) {
+        window.location.href = '/';
+      }
+    }
+  });
 </script>
+
+<style>
+  @media (max-width: 768px) {
+    .social-grid { grid-template-columns: repeat(2, 1fr) !important; }
+  }
+  @media (max-width: 480px) {
+    .social-grid { grid-template-columns: 1fr !important; }
+  }
+</style>

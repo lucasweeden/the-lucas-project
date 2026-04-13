@@ -38,7 +38,7 @@ const tickerText = "THE LUCAS PROJECT · IT'S ABOUT THAT TIME · BUILDER · OPER
   if (canvas) {
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100);
-    camera.position.z = 5;
+    camera.position.z = 6;
 
     const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -68,7 +68,7 @@ const tickerText = "THE LUCAS PROJECT · IT'S ABOUT THAT TIME · BUILDER · OPER
     });
 
     // Change 2: Main coin — large, bright
-    const mainGeo = new THREE.CylinderGeometry(1.2, 1.2, 0.12, 64);
+    const mainGeo = new THREE.CylinderGeometry(1.8, 1.8, 0.18, 64);
     const mainFace = faceMat.clone();
     mainFace.emissiveIntensity = 0.4;
     const coin = new THREE.Mesh(mainGeo, [rimMat.clone(), mainFace, mainFace.clone()]);
@@ -79,7 +79,7 @@ const tickerText = "THE LUCAS PROJECT · IT'S ABOUT THAT TIME · BUILDER · OPER
     scene.add(coin);
 
     // Green halo rim glow
-    const haloGeo = new THREE.CylinderGeometry(1.28, 1.28, 0.13, 64);
+    const haloGeo = new THREE.CylinderGeometry(1.92, 1.92, 0.2, 64);
     const haloMat = new THREE.MeshBasicMaterial({ color: 0x5aba32, transparent: true, opacity: 0.35, side: THREE.BackSide });
     const halo = new THREE.Mesh(haloGeo, haloMat);
     scene.add(halo);

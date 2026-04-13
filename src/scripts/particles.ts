@@ -1,15 +1,14 @@
-// Change 4: 1000 floating LP logo coins across entire page
-// Change 11: Cursor green spark flares
+// v6 Change 4: 1000 self-moving LP coins with physics-based cursor interaction
 
 export function initFloatingCoins() {
   const isMobile = window.innerWidth < 768;
   const count = isMobile ? 80 : 1000;
-  const docHeight = Math.max(document.body.scrollHeight, 6000);
   const container = document.getElementById('lp-coin-bg');
   if (!container) return;
 
-  // Set container height to full page
-  container.style.height = docHeight + 'px';
+  const pageW = window.innerWidth;
+  const pageH = Math.max(document.body.scrollHeight, 6000);
+  container.style.height = pageH + 'px';
 
   let mouseX = -9999, mouseY = -9999;
   document.addEventListener('mousemove', (e) => {
@@ -17,50 +16,92 @@ export function initFloatingCoins() {
     mouseY = e.clientY + window.scrollY;
   });
 
-  const frag = document.createDocumentFragment();
+  interface Coin {
+    el: HTMLElement;
+    x: number;
+    y: number;
+    vx: number;
+    vy: number;
+    size: number;
+    rot: number;
+    rotSpeed: number;
+  }
 
-  interface CoinRef { el: HTMLElement; x: number; y: number; baseX: number; baseY: number; }
-  const coins: CoinRef[] = [];
+  const coins: Coin[] = [];
+  const frag = document.createDocumentFragment();
 
   for (let i = 0; i < count; i++) {
     const el = document.createElement('div');
     const size = Math.floor(Math.random() * 51 + 14);
-    const x = Math.random() * window.innerWidth;
-    const y = Math.random() * docHeight;
+    const x = Math.random() * pageW;
+    const y = Math.random() * pageH;
     const opacity = (0.18 + Math.random() * 0.37).toFixed(2);
-    const spinDur = (3 + Math.random() * 8).toFixed(1);
-    const floatDur = (4 + Math.random() * 6).toFixed(1);
-    const delay = (Math.random() * -parseFloat(spinDur)).toFixed(1);
 
     el.className = 'lp-coin-particle';
-    el.style.cssText = `position:absolute;left:${x}px;top:${y}px;width:${size}px;height:${size}px;opacity:${opacity};will-change:transform;animation:lpCoinSpin ${spinDur}s linear infinite, lpCoinFloat ${floatDur}s ease-in-out infinite alternate;animation-delay:${delay}s,${(Math.random()*-parseFloat(floatDur)).toFixed(1)}s;`;
+    el.style.cssText = `position:absolute;width:${size}px;height:${size}px;opacity:${opacity};will-change:transform;`;
     el.innerHTML = `<img src="/images/smallLucas_Project_Logo.png" alt="" style="width:100%;height:100%;border-radius:50%;display:block;pointer-events:none;" />`;
     frag.appendChild(el);
-    coins.push({ el, x, y, baseX: x, baseY: y });
+
+    coins.push({
+      el, x, y,
+      vx: (Math.random() - 0.5) * 0.4,
+      vy: (Math.random() - 0.5) * 0.4,
+      size,
+      rot: Math.random() * 360,
+      rotSpeed: 0.3 + Math.random() * 1.5,
+    });
   }
   container.appendChild(frag);
 
-  // Mouse repulsion — check every 3rd frame
-  let frame = 0;
-  function repulse() {
-    requestAnimationFrame(repulse);
-    frame++;
-    if (frame % 3 !== 0) return;
+  function animate() {
+    requestAnimationFrame(animate);
+    const scrollY = window.scrollY;
+    const vpTop = scrollY - 200;
+    const vpBottom = scrollY + window.innerHeight + 200;
+
     for (const c of coins) {
+      // Cursor repulsion
       const dx = c.x - mouseX;
       const dy = c.y - mouseY;
       const dist = Math.sqrt(dx * dx + dy * dy);
-      if (dist < 140 && dist > 0) {
-        const push = (140 - dist) / 140 * 20;
-        const px = (dx / dist) * push;
-        const py = (dy / dist) * push;
-        c.el.style.transform = `translateX(${px}px) translateY(${py}px)`;
-      } else {
-        c.el.style.transform = '';
+      if (dist < 160 && dist > 0) {
+        const angle = Math.atan2(dy, dx);
+        const force = (160 - dist) * 0.04;
+        c.vx += Math.cos(angle) * force;
+        c.vy += Math.sin(angle) * force;
+      }
+
+      // Velocity cap
+      const speed = Math.sqrt(c.vx * c.vx + c.vy * c.vy);
+      if (speed > 3.0) {
+        c.vx = (c.vx / speed) * 3.0;
+        c.vy = (c.vy / speed) * 3.0;
+      }
+
+      // Damping
+      c.vx *= 0.97;
+      c.vy *= 0.97;
+
+      // Move
+      c.x += c.vx;
+      c.y += c.vy;
+
+      // Bounce off walls
+      if (c.x < 0) { c.x = 0; c.vx = Math.abs(c.vx); }
+      if (c.x > pageW - c.size) { c.x = pageW - c.size; c.vx = -Math.abs(c.vx); }
+      if (c.y < 0) { c.y = 0; c.vy = Math.abs(c.vy); }
+      if (c.y > pageH - c.size) { c.y = pageH - c.size; c.vy = -Math.abs(c.vy); }
+
+      // Spin
+      c.rot += c.rotSpeed;
+
+      // Only update DOM for coins in/near viewport (performance)
+      if (c.y > vpTop && c.y < vpBottom) {
+        c.el.style.transform = `translate(${c.x}px, ${c.y}px) rotateY(${c.rot}deg)`;
       }
     }
   }
-  repulse();
+  animate();
 }
 
 // Cursor green spark flares
