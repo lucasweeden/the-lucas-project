@@ -1,13 +1,36 @@
 ---
 ---
+<!-- Horizontal top bar -->
 <div class="scroll-progress" id="scroll-progress"></div>
+<!-- Change 3: Vertical left side bar -->
+<div class="scroll-progress-v" id="scroll-progress-v">
+  <div class="scroll-progress-v-fill" id="scroll-progress-v-fill"></div>
+</div>
 
 <script>
-  const bar = document.getElementById('scroll-progress');
+  const hBar = document.getElementById('scroll-progress');
+  const vFill = document.getElementById('scroll-progress-v-fill');
   window.addEventListener('scroll', () => {
     const scrollTop = window.scrollY;
     const docHeight = document.documentElement.scrollHeight - window.innerHeight;
     const pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
-    if (bar) bar.style.width = pct + '%';
+    if (hBar) hBar.style.width = pct + '%';
+    if (vFill) vFill.style.height = pct + '%';
   });
 </script>
+
+<style>
+  .scroll-progress-v {
+    position: fixed;
+    left: 0; top: 0;
+    width: 3px; height: 100vh;
+    z-index: 9999;
+    background: rgba(255,255,255,0.08);
+  }
+  .scroll-progress-v-fill {
+    width: 100%;
+    height: 0%;
+    background: linear-gradient(to bottom, #5aba32, #3dd8c5, #8855cc, #d4a843, #e86050, #5aba32);
+    transition: height 0.05s linear;
+  }
+</style>

@@ -4,13 +4,15 @@ const links = [
   { href: "#building", label: "Work" },
   { href: "#story", label: "Story" },
   { href: "#ventures", label: "Ventures" },
-  { href: "#contact", label: "Contact" },
+  { href: "/resources", label: "Resources" },
 ];
 ---
 <nav class="site-nav" id="site-nav">
   <div class="nav-left">
-    <img src="/images/smallLucas_Project_Logo.png" alt="LP" class="nav-logo" />
-    <span class="nav-name">Lucas Weeden</span>
+    <a href="/" style="display:flex;align-items:center;gap:12px;text-decoration:none;">
+      <img src="/images/smallLucas_Project_Logo.png" alt="LP" class="nav-logo" />
+      <span class="nav-name">Lucas Weeden</span>
+    </a>
   </div>
   <div class="nav-center">
     {links.map((l) => (

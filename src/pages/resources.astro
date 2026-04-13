@@ -1,0 +1,44 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+import ScrollProgress from '../components/ScrollProgress.astro';
+---
+
+<Layout title="Resources — Lucas Weeden">
+  <ScrollProgress />
+  <Nav />
+
+  <main style="position: relative; z-index: 2; padding-top: 120px; min-height: 80vh;">
+    <section class="site-section" id="resources">
+      <div class="section-inner" style="text-align: center;">
+        <div class="section-label">09 — Resources</div>
+        <h2 class="section-title">RESOURCES</h2>
+
+        <!-- Copyable link box -->
+        <div class="copy-link-box" style="display: inline-flex; align-items: center; gap: 12px; margin-bottom: 40px; padding: 12px 20px; border: 1px solid var(--border); border-radius: 8px; background: var(--card-bg);">
+          <span id="resource-url" style="font-family: 'Syne', sans-serif; font-size: 14px; letter-spacing: 0.05em; color: var(--text); user-select: all;">lucasweeden.com/resources</span>
+          <button id="copy-link-btn" style="font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; padding: 8px 16px; border: 1px solid var(--accent); background: transparent; color: var(--accent); border-radius: 4px; cursor: pointer; transition: all 0.3s ease;">Copy Link</button>
+        </div>
+
+        <p style="font-size: 20px; opacity: 0.8; max-width: 500px; margin: 0 auto 20px;">
+          Collabs, podcasts, brand deals, or just say what's up.
+        </p>
+        <a href="mailto:Lucasproject@lucasweeden.com" class="contact-email-btn">
+          Lucasproject@lucasweeden.com
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <Footer />
+</Layout>
+
+<script>
+  document.getElementById('copy-link-btn')?.addEventListener('click', () => {
+    navigator.clipboard.writeText('https://lucasweeden.com/resources').then(() => {
+      const btn = document.getElementById('copy-link-btn');
+      if (btn) { btn.textContent = 'Copied!'; setTimeout(() => { btn.textContent = 'Copy Link'; }, 2000); }
+    });
+  });
+</script>

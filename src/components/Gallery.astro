@@ -1,6 +1,5 @@
 ---
-// Change 4: 3D carousel. Change 16: renamed/replaced cards. Change 19: no duplicates with other sections.
-// Excluded from gallery (used elsewhere): IMG_0717, IMG_4848, IMG_2282, IMG_1218, IMG_1426, IMG_5426, IMG_1770, IMG_1530, FullSizeRender, IMG_2829
+// Change 6: Gallery photo title updates
 const photos = [
   { src: "IMG_4863.jpeg", caption: "Golden Hour" },
   { src: "IMG_6652.jpeg", caption: "On Stage" },
@@ -12,12 +11,11 @@ const photos = [
   { src: "IMG_4459.jpeg", caption: "Acoustic" },
   { src: "IMG_2720.jpeg", caption: "Road Trip" },
   { src: "IMG_0856.jpeg", caption: "Camp Life" },
-  { src: "IMG_1345.PNG", caption: "Origins" },
+  { src: "IMG_1345.PNG", caption: "Great Grandpa", coverFit: true },
   { src: "IMG_0045.jpeg", caption: "Dog Run" },
   { src: "IMG_4463.jpeg", caption: "Festival" },
-  { src: "IMG_1053.jpeg", caption: "On The Roof" },
-  { src: "IMG_8617.jpeg", caption: "Back On The Roof" },
-  { src: "IMG_2975.jpeg", caption: "Best Friend" },
+  { src: "IMG_8617.jpeg", caption: "On The Roof" },
+  { src: "IMG_2975.jpeg", caption: "Rooftop Sunset" },
   { src: "IMG_1501.jpeg", caption: "Baby Days" },
   { src: "IMG_0153.JPG", caption: "Good Vibes" },
   { src: "IMG_4561.jpeg", caption: "Adventure" },
@@ -43,7 +41,13 @@ const photos = [
             data-caption={photo.caption}
             style={`transform: rotateY(${angle}deg) translateZ(600px);`}
           >
-            <img src={`/images/${photo.src}`} alt={photo.caption} loading="lazy" onerror="this.parentElement.style.display='none'" />
+            <img
+              src={`/images/${photo.src}`}
+              alt={photo.caption}
+              loading="lazy"
+              onerror="this.parentElement.style.display='none'"
+              style={photo.coverFit ? 'object-fit: cover; width: 100%; height: 100%; object-position: center;' : ''}
+            />
             <div class="caption">{photo.caption}</div>
           </div>
         );
@@ -52,7 +56,6 @@ const photos = [
   </div>
 </section>
 
-<!-- Lightbox -->
 <div class="lightbox" id="lightbox">
   <button class="lightbox-close" id="lightbox-close">&times;</button>
   <img id="lightbox-img" src="" alt="" />
@@ -77,28 +80,20 @@ const photos = [
       inner.style.transform = `rotateY(${currentAngle}deg)`;
     }
 
-    // Mouse wheel spin
     wrap.addEventListener('wheel', (e) => {
       e.preventDefault();
       velocity += e.deltaY * 0.08;
     }, { passive: false });
 
-    // Drag spin
-    wrap.addEventListener('mousedown', (e) => {
-      isDragging = true;
-      startX = e.clientX;
-      velocity = 0;
-    });
+    wrap.addEventListener('mousedown', (e) => { isDragging = true; startX = e.clientX; velocity = 0; });
     window.addEventListener('mousemove', (e) => {
       if (!isDragging) return;
-      const dx = e.clientX - startX;
-      currentAngle += dx * 0.3;
+      currentAngle += (e.clientX - startX) * 0.3;
       startX = e.clientX;
       updateCarousel();
     });
     window.addEventListener('mouseup', () => { isDragging = false; });
 
-    // Inertia loop
     function animateCarousel() {
       requestAnimationFrame(animateCarousel);
       if (!isDragging && Math.abs(velocity) > 0.01) {
@@ -111,22 +106,15 @@ const photos = [
     updateCarousel();
   }
 
-  // Lightbox
   document.querySelectorAll('.carousel-card').forEach(card => {
     card.addEventListener('click', () => {
-      const src = card.getAttribute('data-src') || '';
-      const caption = card.getAttribute('data-caption') || '';
-      if (lbImg) lbImg.src = src;
-      if (lbCaption) lbCaption.textContent = caption;
+      if (lbImg) lbImg.src = card.getAttribute('data-src') || '';
+      if (lbCaption) lbCaption.textContent = card.getAttribute('data-caption') || '';
       lightbox?.classList.add('active');
     });
   });
 
   lbClose?.addEventListener('click', () => lightbox?.classList.remove('active'));
-  lightbox?.addEventListener('click', (e) => {
-    if (e.target === lightbox) lightbox.classList.remove('active');
-  });
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') lightbox?.classList.remove('active');
-  });
+  lightbox?.addEventListener('click', (e) => { if (e.target === lightbox) lightbox.classList.remove('active'); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') lightbox?.classList.remove('active'); });
 </script>

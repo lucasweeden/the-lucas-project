@@ -23,7 +23,7 @@ import Footer from '../components/Footer.astro';
   <Nav />
   <CustomCursor />
 
-  <!-- Change 10: LP coins only background layer (z-index: 0, behind everything) -->
+  <!-- Change 10: LP coins background (z-index: 0) -->
   <div id="lp-coin-bg" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; overflow: hidden;"></div>
 
   <main style="position: relative; z-index: 2;">
@@ -43,11 +43,12 @@ import Footer from '../components/Footer.astro';
 </Layout>
 
 <script>
-  import { initFloatingCoins } from '../scripts/particles';
+  import { initFloatingCoins, initCursorSparks } from '../scripts/particles';
   import { initAnimations } from '../scripts/animations';
 
   document.addEventListener('DOMContentLoaded', () => {
     initFloatingCoins();
+    initCursorSparks();
     initAnimations();
   });
 </script>

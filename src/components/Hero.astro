@@ -12,7 +12,7 @@ const tickerText = "THE LUCAS PROJECT · IT'S ABOUT THAT TIME · BUILDER · OPER
     <div class="hero-title-line hero-title-outline">WEEDEN</div>
     <div class="hero-tagline">Builder &middot; Operator &middot; Creator</div>
     <div class="hero-cta">
-      <a href="#lucas-project" class="btn-ghost">Build your dreams or build someone else's</a>
+      <a href="#about" class="btn-ghost">Build your dreams or build someone else's</a>
     </div>
   </div>
   <div class="scroll-indicator">
@@ -28,7 +28,6 @@ const tickerText = "THE LUCAS PROJECT · IT'S ABOUT THAT TIME · BUILDER · OPER
   </div>
 </section>
 
-<!-- Persistent floating coin -->
 <img src="/images/smallLucas_Project_Logo.png" alt="" class="persistent-coin" id="persistent-coin" />
 
 <script>
@@ -45,62 +44,59 @@ const tickerText = "THE LUCAS PROJECT · IT'S ABOUT THAT TIME · BUILDER · OPER
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-    // Change 3: LP brand exact colors
-    const ambient = new THREE.AmbientLight(0x1a4d0a, 0.4);
-    scene.add(ambient);
-    const pointLight1 = new THREE.PointLight(0x5aba32, 2.0, 20);
-    pointLight1.position.set(3, 3, 4);
-    scene.add(pointLight1);
-    const pointLight2 = new THREE.PointLight(0x8cd867, 1.0, 20);
-    pointLight2.position.set(-3, -2, 3);
-    scene.add(pointLight2);
+    // LP brand lighting
+    scene.add(new THREE.AmbientLight(0x1a4d0a, 0.4));
+    const pl1 = new THREE.PointLight(0x5aba32, 2.0, 20);
+    pl1.position.set(3, 3, 4);
+    scene.add(pl1);
+    const pl2 = new THREE.PointLight(0x8cd867, 1.0, 20);
+    pl2.position.set(-3, -2, 3);
+    scene.add(pl2);
 
-    const textureLoader = new THREE.TextureLoader();
-    const logoTexture = textureLoader.load('/images/smallLucas_Project_Logo.png');
-    logoTexture.colorSpace = THREE.SRGBColorSpace;
+    const loader = new THREE.TextureLoader();
+    const logoTex = loader.load('/images/smallLucas_Project_Logo.png');
+    logoTex.colorSpace = THREE.SRGBColorSpace;
 
-    // Change 1+3: All coins use LP logo texture on BOTH faces, brand colors
-    const coinGeo = new THREE.CylinderGeometry(1.2, 1.2, 0.15, 64);
-    const coinMaterials = [
-      new THREE.MeshStandardMaterial({ color: 0x3a7a2a, metalness: 0.4, roughness: 0.3 }), // edge/rim
-      new THREE.MeshStandardMaterial({ map: logoTexture, metalness: 0.4, roughness: 0.3 }), // top face
-      new THREE.MeshStandardMaterial({ map: logoTexture, metalness: 0.4, roughness: 0.3 }), // bottom face
+    // Change 2: Large center coin — LP logo, infinite 360 flip
+    const mainGeo = new THREE.CylinderGeometry(2.0, 2.0, 0.18, 64);
+    const mainMats = [
+      new THREE.MeshStandardMaterial({ color: 0x3a7a2a, metalness: 0.4, roughness: 0.3 }),
+      new THREE.MeshStandardMaterial({ map: logoTex, metalness: 0.4, roughness: 0.3 }),
+      new THREE.MeshStandardMaterial({ map: logoTex, metalness: 0.4, roughness: 0.3 }),
     ];
-    const coin = new THREE.Mesh(coinGeo, coinMaterials);
-    // Change 2: Start flat/horizontal (lying on side)
-    coin.rotation.x = Math.PI * 0.5; // flat horizontal
+    const coin = new THREE.Mesh(mainGeo, mainMats);
     scene.add(coin);
 
-    // Rim glow with brand color
-    const glowGeo = new THREE.CylinderGeometry(1.35, 1.35, 0.18, 64);
-    const glowMat = new THREE.MeshBasicMaterial({
-      color: 0x5aba32, transparent: true, opacity: 0.12, blending: THREE.AdditiveBlending,
-    });
+    // Rim glow
+    const glowGeo = new THREE.CylinderGeometry(2.2, 2.2, 0.22, 64);
+    const glowMat = new THREE.MeshBasicMaterial({ color: 0x5aba32, transparent: true, opacity: 0.1, blending: THREE.AdditiveBlending });
     const glow = new THREE.Mesh(glowGeo, glowMat);
-    glow.rotation.x = coin.rotation.x;
     scene.add(glow);
 
-    // Background coins — ALL use LP logo texture (Change 1)
+    // Infinite 360 flip via GSAP
+    gsap.to(coin.rotation, { y: Math.PI * 2, duration: 2.5, ease: 'none', repeat: -1 });
+
+    // Background LP logo coins
     interface BgCoin { mesh: THREE.Mesh; vx: number; vy: number; rotSpeed: number; baseX: number; baseY: number; }
     const bgCoins: BgCoin[] = [];
     const bgGeo = new THREE.CylinderGeometry(1, 1, 0.1, 32);
 
     for (let i = 0; i < 50; i++) {
       const scale = 0.15 + Math.random() * 0.45;
+      const op = 0.3 + Math.random() * 0.5;
       const bgMat = [
-        new THREE.MeshStandardMaterial({ color: 0x3a7a2a, metalness: 0.4, roughness: 0.3, transparent: true, opacity: 0.3 + Math.random() * 0.5 }),
-        new THREE.MeshStandardMaterial({ map: logoTexture, metalness: 0.4, roughness: 0.3, transparent: true, opacity: 0.3 + Math.random() * 0.5 }),
-        new THREE.MeshStandardMaterial({ map: logoTexture, metalness: 0.4, roughness: 0.3, transparent: true, opacity: 0.3 + Math.random() * 0.5 }),
+        new THREE.MeshStandardMaterial({ color: 0x3a7a2a, metalness: 0.4, roughness: 0.3, transparent: true, opacity: op }),
+        new THREE.MeshStandardMaterial({ map: logoTex, metalness: 0.4, roughness: 0.3, transparent: true, opacity: op }),
+        new THREE.MeshStandardMaterial({ map: logoTex, metalness: 0.4, roughness: 0.3, transparent: true, opacity: op }),
       ];
-      const bgCoin = new THREE.Mesh(bgGeo, bgMat);
-      bgCoin.scale.set(scale, scale, scale);
+      const m = new THREE.Mesh(bgGeo, bgMat);
+      m.scale.set(scale, scale, scale);
       const x = (Math.random() - 0.5) * 16;
       const y = (Math.random() - 0.5) * 16;
-      const z = -5 - Math.random() * 10;
-      bgCoin.position.set(x, y, z);
-      bgCoin.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, 0);
-      scene.add(bgCoin);
-      bgCoins.push({ mesh: bgCoin, vx: 0, vy: 0, rotSpeed: (Math.random() - 0.5) * 0.02, baseX: x, baseY: y });
+      m.position.set(x, y, -5 - Math.random() * 10);
+      m.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, 0);
+      scene.add(m);
+      bgCoins.push({ mesh: m, vx: 0, vy: 0, rotSpeed: (Math.random() - 0.5) * 0.02, baseX: x, baseY: y });
     }
 
     let mouseNX = 0, mouseNY = 0;
@@ -110,39 +106,20 @@ const tickerText = "THE LUCAS PROJECT · IT'S ABOUT THAT TIME · BUILDER · OPER
     });
 
     let isVisible = true;
-    const observer = new IntersectionObserver(([entry]) => { isVisible = entry.isIntersecting; }, { threshold: 0.1 });
-    const heroSection = document.getElementById('hero');
-    if (heroSection) observer.observe(heroSection);
+    const obs = new IntersectionObserver(([e]) => { isVisible = e.isIntersecting; }, { threshold: 0.1 });
+    const heroEl = document.getElementById('hero');
+    if (heroEl) obs.observe(heroEl);
 
-    // Change 2: After loading screen clears, animate coin from flat → upright
-    let coinReady = false;
-    let targetRotX = Math.PI * 0.1; // upright facing user
-    setTimeout(() => {
-      // Animate coin standing up over 1.2s
-      const startRot = coin.rotation.x;
-      const obj = { t: 0 };
-      gsap.to(obj, {
-        t: 1, duration: 1.2, ease: 'power3.out',
-        onUpdate: () => {
-          coin.rotation.x = startRot + (targetRotX - startRot) * obj.t;
-          glow.rotation.x = coin.rotation.x;
-        },
-        onComplete: () => { coinReady = true; }
-      });
-    }, 2600); // After loading screen finishes (~2.5s)
-
+    let time = 0;
     function animate() {
       requestAnimationFrame(animate);
       if (!isVisible) return;
+      time += 0.016;
 
-      coin.rotation.y += 0.003;
-      if (coinReady) {
-        coin.rotation.x = targetRotX + mouseNY * 0.4;
-        coin.rotation.z = mouseNX * 0.4;
-      }
-      glow.rotation.y = coin.rotation.y;
-      glow.rotation.x = coin.rotation.x;
-      glow.rotation.z = coin.rotation.z;
+      // Wobble tilt + mouse tilt overlay (GSAP handles Y rotation)
+      coin.rotation.x = Math.sin(time * 0.8) * 0.3 + mouseNY * 0.35;
+      coin.rotation.z = mouseNX * 0.35;
+      glow.rotation.copy(coin.rotation);
 
       bgCoins.forEach((bc) => {
         bc.mesh.rotation.y += bc.rotSpeed;
@@ -151,9 +128,9 @@ const tickerText = "THE LUCAS PROJECT · IT'S ABOUT THAT TIME · BUILDER · OPER
         const dy = bc.mesh.position.y - mouseNY * 5;
         const dist = Math.sqrt(dx * dx + dy * dy);
         if (dist < 3) {
-          const force = (3 - dist) * 0.005;
-          bc.vx += (dx / dist) * force;
-          bc.vy += (dy / dist) * force;
+          const f = (3 - dist) * 0.005;
+          bc.vx += (dx / dist) * f;
+          bc.vy += (dy / dist) * f;
         }
         bc.vx += (bc.baseX - bc.mesh.position.x) * 0.002;
         bc.vy += (bc.baseY - bc.mesh.position.y) * 0.002;
@@ -172,47 +149,27 @@ const tickerText = "THE LUCAS PROJECT · IT'S ABOUT THAT TIME · BUILDER · OPER
     });
   }
 
-  // Change 4: Persistent coin — flick transition + sticky scroll behavior
+  // Persistent coin scroll behavior
   const persistCoin = document.getElementById('persistent-coin');
   let coinFlicked = false;
   let lastSectionIdx = -1;
-
   window.addEventListener('scroll', () => {
     if (!persistCoin) return;
-    const heroH = window.innerHeight;
-    const scrollY = window.scrollY;
-
-    if (scrollY > heroH * 0.8 && !coinFlicked) {
+    if (window.scrollY > window.innerHeight * 0.8 && !coinFlicked) {
       coinFlicked = true;
       persistCoin.style.opacity = '1';
-      persistCoin.style.transition = 'none';
-      // Flick up animation
-      persistCoin.style.bottom = '50vh';
-      persistCoin.style.right = '50vw';
-      persistCoin.style.width = '80px';
-      persistCoin.style.height = '80px';
-      persistCoin.style.transform = 'rotateY(0deg) scale(1.3)';
-
-      gsap.to(persistCoin, {
-        bottom: 24, right: 24, width: 48, height: 48, scale: 1,
-        rotateY: 360, duration: 0.8, ease: 'bounce.out', delay: 0.4,
-      });
+      gsap.fromTo(persistCoin, { bottom: '50vh', right: '50vw', width: 80, height: 80, scale: 1.3, rotateY: 0 },
+        { bottom: 24, right: 24, width: 48, height: 48, scale: 1, rotateY: 360, duration: 0.8, ease: 'bounce.out', delay: 0.2 });
     }
-
     if (coinFlicked) {
       persistCoin.classList.add('visible');
-
-      // Section transition spin
       const sections = document.querySelectorAll('.site-section');
-      let currentIdx = 0;
-      sections.forEach((sec, i) => {
-        const rect = sec.getBoundingClientRect();
-        if (rect.top < window.innerHeight * 0.5) currentIdx = i;
-      });
-      if (currentIdx !== lastSectionIdx && lastSectionIdx >= 0) {
+      let idx = 0;
+      sections.forEach((s, i) => { if (s.getBoundingClientRect().top < window.innerHeight * 0.5) idx = i; });
+      if (idx !== lastSectionIdx && lastSectionIdx >= 0) {
         gsap.to(persistCoin, { rotateY: '+=180', duration: 0.3, ease: 'power2.inOut' });
       }
-      lastSectionIdx = currentIdx;
+      lastSectionIdx = idx;
     }
   });
 </script>

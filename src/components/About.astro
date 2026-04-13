@@ -1,6 +1,4 @@
 ---
-// Change 7: Full 3D first-person spiral staircase timeline (Three.js)
-// Uses ScrollTrigger pinning + scrub. Mobile fallback to flat timeline.
 const timeline = [
   { title: "Born Against the Odds", photo: "IMG_2282.jpeg", text: "Wasn't supposed to be born — both parents were using protection. Born in Oceanside, CA. Learned to swim before I could walk. Moved to Texas at age 2." },
   { title: "The Early Hustle", photo: "IMG_2829.jpeg", text: "By age 10, doing door-to-door sales splitting firewood profits with my great-grandfather. Candy business clearing $1K+/week in middle school. Learned early: positivity always wins." },
@@ -32,30 +30,29 @@ const timeline = [
           Builder, operator, creator. $10M+ in roof sales across six years in Texas. Co-founded two companies. Won training MVP out of thousands of reps. Set records that still stand. Then a dirt bike sent me to a wheelchair — which sent me to a computer — which sent me straight into AI. Limitless Roofing Solutions was built from that chair. Every chapter in this story was earned the hard way, not handed over. Based in Texas. Always building.
         </p>
         <div class="stats-bar">
-          <div class="stat-item">
-            <div class="stat-number" data-count="10">$0</div>
-            <div class="stat-label">Roof Sales (M+)</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-number" data-count="6">0</div>
-            <div class="stat-label">Years In The Game</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-number" data-count="3.2">$0</div>
-            <div class="stat-label">Best Year (M)</div>
-          </div>
+          <div class="stat-item"><div class="stat-number" data-count="10">$0</div><div class="stat-label">Roof Sales (M+)</div></div>
+          <div class="stat-item"><div class="stat-number" data-count="6">0</div><div class="stat-label">Years In The Game</div></div>
+          <div class="stat-item"><div class="stat-number" data-count="3.2">$0</div><div class="stat-label">Best Year (M)</div></div>
         </div>
       </div>
     </div>
 
     <h3 class="section-title" style="font-size: clamp(36px, 5vw, 64px); text-align: center; margin-top: 80px;" id="story">HOW I GOT HERE</h3>
 
-    <!-- 3D Staircase container (desktop) -->
-    <div id="staircase-container" class="staircase-container">
+    <!-- Change 9: Three.js spiral staircase (desktop) -->
+    <div id="staircase-section" class="staircase-section">
       <canvas id="staircase-canvas"></canvas>
+      <!-- Overlay panels for timeline entries positioned via JS -->
+      {timeline.map((entry, i) => (
+        <div class="stair-panel" id={`stair-panel-${i}`} data-index={i}>
+          <img src={`/images/${entry.photo}`} alt={entry.title} loading="lazy" onerror="this.style.display='none'" />
+          <div class="stair-panel-title">{entry.title}</div>
+          <div class="stair-panel-text">{entry.text}</div>
+        </div>
+      ))}
     </div>
 
-    <!-- Mobile fallback timeline -->
+    <!-- Mobile fallback -->
     <div class="mobile-timeline" id="mobile-timeline">
       {timeline.map((entry) => (
         <div class="spiral-step">
@@ -82,189 +79,202 @@ const timeline = [
   gsap.registerPlugin(ScrollTrigger);
 
   const isMobile = window.innerWidth < 768;
-  const container = document.getElementById('staircase-container');
-  const mobileTimeline = document.getElementById('mobile-timeline');
+  const section = document.getElementById('staircase-section');
+  const mobileEl = document.getElementById('mobile-timeline');
   const stairCanvas = document.getElementById('staircase-canvas') as HTMLCanvasElement;
 
   if (isMobile) {
-    if (container) container.style.display = 'none';
-    if (mobileTimeline) mobileTimeline.style.display = 'block';
-    // Animate mobile steps in
+    if (section) section.style.display = 'none';
+    if (mobileEl) mobileEl.style.display = 'block';
     document.querySelectorAll('#mobile-timeline .spiral-step').forEach((step) => {
-      ScrollTrigger.create({
-        trigger: step, start: 'top 80%',
-        onEnter: () => step.classList.add('visible'),
-      });
+      ScrollTrigger.create({ trigger: step, start: 'top 80%', onEnter: () => step.classList.add('visible') });
     });
   } else {
-    if (mobileTimeline) mobileTimeline.style.display = 'none';
-    if (container && stairCanvas) {
-      const timelineData = [
-        { title: "BORN AGAINST THE ODDS", photo: "/images/IMG_2282.jpeg", text: "Wasn't supposed to be born — born in Oceanside, CA. Moved to Texas at age 2." },
-        { title: "THE EARLY HUSTLE", photo: "/images/IMG_2829.jpeg", text: "Door-to-door sales at 10. Candy business clearing $1K+/week in middle school." },
-        { title: "HIGH SCHOOL YEARS", photo: "/images/IMG_1218.PNG", text: "Football ages 5–18. Six concussions. Senior year: 40+ hours/week." },
-        { title: "THE LEAP AT 19", photo: "/images/IMG_1426.jpeg", text: "Quit Dominos. Holden Roofing. New car. New apartment. $450K first month." },
-        { title: "BUILDING THE CAREER", photo: "/images/FullSizeRender.jpg", text: "$10M+ across 6 years. Co-founded Screaming Eagle. Priority Roofing MVP." },
-        { title: "THE CRASH", photo: "/images/IMG_5426.jpeg", text: "Desert. Dirt bike. Full send. ACL, MCL, LCL — everything. Wheelchair." },
-        { title: "THE PIVOT", photo: "/images/IMG_1770.jpeg", text: "Forced into AI. Found Chase. Built Limitless from scratch." },
-        { title: "RIGHT NOW", photo: "/images/IMG_4848.jpeg", text: "Building in public. Living wide open. It's about that time." },
-      ];
-
-      container.style.height = '400vh'; // Tall enough for scroll pinning
+    if (mobileEl) mobileEl.style.display = 'none';
+    if (section && stairCanvas) {
+      const w = section.clientWidth;
+      const h = window.innerHeight;
 
       const scene = new THREE.Scene();
-      scene.fog = new THREE.FogExp2(0x050f02, 0.06);
+      scene.background = new THREE.Color(0x060d04);
+      scene.fog = new THREE.FogExp2(0x060d04, 0.06);
 
-      const camera = new THREE.PerspectiveCamera(65, container.clientWidth / container.clientHeight, 0.1, 100);
-      const renderer = new THREE.WebGLRenderer({ canvas: stairCanvas, alpha: true, antialias: true });
-      renderer.setSize(container.clientWidth, container.clientHeight);
+      const camera = new THREE.PerspectiveCamera(70, w / h, 0.1, 100);
+      const renderer = new THREE.WebGLRenderer({ canvas: stairCanvas, antialias: true });
+      renderer.setSize(w, h);
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
       // Lighting
-      scene.add(new THREE.AmbientLight(0x1a4d0a, 0.6));
-      const mainLight = new THREE.PointLight(0x5aba32, 2.0, 30);
-      mainLight.position.set(0, 5, 3);
-      scene.add(mainLight);
+      scene.add(new THREE.AmbientLight(0x1a3a0a, 0.5));
+      const camLight = new THREE.PointLight(0x5aba32, 1.2, 8);
+      scene.add(camLight);
 
       // Central pole
-      const poleGeo = new THREE.CylinderGeometry(0.08, 0.08, 40, 16);
-      const poleMat = new THREE.MeshStandardMaterial({ color: 0x3a7a2a, emissive: 0x1a3a10, metalness: 0.6, roughness: 0.3 });
-      const pole = new THREE.Mesh(poleGeo, poleMat);
-      pole.position.y = -15;
+      const poleMat = new THREE.MeshStandardMaterial({ color: 0x3a7a2a, emissive: 0x1a4d0a, emissiveIntensity: 0.3, metalness: 0.6, roughness: 0.3 });
+      const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 30, 16), poleMat);
+      pole.position.y = -12;
       scene.add(pole);
 
-      // Build spiral steps and landing panels
-      const stepsPerLanding = 4;
-      const stepAngleInc = Math.PI / 6; // 30 deg per step
-      const stepYDrop = -0.45;
-      const stepRadius = 2.5;
-      const stepGeo = new THREE.BoxGeometry(2.2, 0.08, 0.8);
-      const stepMat = new THREE.MeshStandardMaterial({ color: 0x0a1a05, metalness: 0.5, roughness: 0.4 });
-
-      // Camera path points
+      // Build spiral path and steps
+      const numLandings = 8;
       const cameraPoints: THREE.Vector3[] = [];
-      let currentAngle = 0;
-      let currentY = 2;
+      const stepMat = new THREE.MeshStandardMaterial({ color: 0x0d2006, metalness: 0.3, roughness: 0.5 });
+      const stepGeo = new THREE.BoxGeometry(3, 0.15, 1.5);
 
-      for (let landing = 0; landing < timelineData.length; landing++) {
-        // Build steps leading to this landing
-        for (let s = 0; s < stepsPerLanding; s++) {
-          currentAngle += stepAngleInc;
-          currentY += stepYDrop;
-          const sx = Math.cos(currentAngle) * stepRadius;
-          const sz = Math.sin(currentAngle) * stepRadius;
-          const step = new THREE.Mesh(stepGeo, stepMat);
-          step.position.set(sx, currentY, sz);
-          step.rotation.y = -currentAngle + Math.PI / 2;
-          scene.add(step);
+      for (let i = 0; i < numLandings; i++) {
+        const angle = (i * Math.PI) / 4; // 45 deg increments
+        const y = -i * 2.5;
+        const radius = 3;
+        const sx = Math.cos(angle) * radius;
+        const sz = Math.sin(angle) * radius;
 
-          // Step glow
-          const stepLight = new THREE.PointLight(0x3a7a2a, 0.3, 3);
-          stepLight.position.set(sx, currentY + 0.15, sz);
-          scene.add(stepLight);
-        }
+        // Step
+        const step = new THREE.Mesh(stepGeo, stepMat);
+        step.position.set(sx, y, sz);
+        step.rotation.y = -angle + Math.PI / 2;
+        scene.add(step);
 
-        // Camera point at this landing
-        const cx = Math.cos(currentAngle + stepAngleInc * 0.5) * (stepRadius - 0.8);
-        const cz = Math.sin(currentAngle + stepAngleInc * 0.5) * (stepRadius - 0.8);
-        cameraPoints.push(new THREE.Vector3(cx, currentY + 1.6, cz));
+        // Step light
+        const sLight = new THREE.PointLight(0x5aba32, 0.8, 6);
+        sLight.position.set(sx, y + 0.5, sz);
+        scene.add(sLight);
 
-        // Landing panel — green orb + text indicator
-        const orbGeo = new THREE.SphereGeometry(0.12, 16, 16);
-        const orbMat = new THREE.MeshBasicMaterial({ color: 0x5aba32 });
-        const orb = new THREE.Mesh(orbGeo, orbMat);
-        const orbX = Math.cos(currentAngle) * (stepRadius + 1);
-        const orbZ = Math.sin(currentAngle) * (stepRadius + 1);
-        orb.position.set(orbX, currentY + 1, orbZ);
-        scene.add(orb);
-
-        // Orb glow
-        const orbLight = new THREE.PointLight(0x5aba32, 0.8, 4);
-        orbLight.position.copy(orb.position);
-        scene.add(orbLight);
+        // Camera path point (slightly inside the spiral)
+        const camR = radius - 0.8;
+        cameraPoints.push(new THREE.Vector3(Math.cos(angle) * camR, y + 1.6, Math.sin(angle) * camR));
       }
 
-      // Add some dust particles
+      // Handrail (tube along offset spiral)
+      const railPoints = cameraPoints.map((p, i) => {
+        const angle = (i * Math.PI) / 4;
+        return new THREE.Vector3(Math.cos(angle) * 3.5, p.y - 0.2, Math.sin(angle) * 3.5);
+      });
+      if (railPoints.length >= 2) {
+        const railCurve = new THREE.CatmullRomCurve3(railPoints);
+        const railGeo = new THREE.TubeGeometry(railCurve, 64, 0.04, 8, false);
+        const railMat = new THREE.MeshStandardMaterial({ color: 0x5aba32, emissive: 0x2a5a1a, emissiveIntensity: 0.3, metalness: 0.5, roughness: 0.3 });
+        scene.add(new THREE.Mesh(railGeo, railMat));
+      }
+
+      // Dust particles
       const dustGeo = new THREE.BufferGeometry();
-      const dustPositions = new Float32Array(100 * 3);
-      for (let i = 0; i < 100; i++) {
-        dustPositions[i * 3] = (Math.random() - 0.5) * 10;
-        dustPositions[i * 3 + 1] = Math.random() * -30;
-        dustPositions[i * 3 + 2] = (Math.random() - 0.5) * 10;
-      }
-      dustGeo.setAttribute('position', new THREE.BufferAttribute(dustPositions, 3));
-      const dustMat = new THREE.PointsMaterial({ color: 0x5aba32, size: 0.04, transparent: true, opacity: 0.4 });
-      scene.add(new THREE.Points(dustGeo, dustMat));
+      const dp = new Float32Array(100 * 3);
+      for (let i = 0; i < 100; i++) { dp[i*3] = (Math.random()-0.5)*10; dp[i*3+1] = Math.random()*-25; dp[i*3+2] = (Math.random()-0.5)*10; }
+      dustGeo.setAttribute('position', new THREE.BufferAttribute(dp, 3));
+      scene.add(new THREE.Points(dustGeo, new THREE.PointsMaterial({ color: 0x5aba32, size: 0.05, transparent: true, opacity: 0.4 })));
 
-      // Camera path curve
-      if (cameraPoints.length < 2) {
-        cameraPoints.push(new THREE.Vector3(0, 0, 3));
-        cameraPoints.push(new THREE.Vector3(0, -5, 3));
-      }
+      // Camera curve
       const cameraCurve = new THREE.CatmullRomCurve3(cameraPoints);
+      camera.position.copy(cameraCurve.getPointAt(0));
 
-      // Initial camera
-      const startPos = cameraCurve.getPointAt(0);
-      camera.position.copy(startPos);
-      const lookTarget = cameraCurve.getPointAt(0.02);
-      lookTarget.y -= 0.5;
-      camera.lookAt(lookTarget);
-
-      // Scroll-driven camera movement
+      // Scroll binding
       const scrollData = { progress: 0 };
       ScrollTrigger.create({
-        trigger: container,
+        trigger: section,
         start: 'top top',
-        end: 'bottom bottom',
-        scrub: 1,
-        pin: stairCanvas,
-        onUpdate: (self) => {
-          scrollData.progress = self.progress;
-        }
+        end: `+=${window.innerHeight * 8}`,
+        scrub: 0.8,
+        pin: true,
+        onUpdate: (self) => { scrollData.progress = self.progress; }
       });
+
+      // Show/hide overlay panels based on scroll progress
+      const panels = document.querySelectorAll('.stair-panel');
 
       function animateStaircase() {
         requestAnimationFrame(animateStaircase);
-
-        const t = Math.min(scrollData.progress, 0.999);
+        const t = Math.max(0, Math.min(scrollData.progress, 0.999));
         const pos = cameraCurve.getPointAt(t);
         camera.position.copy(pos);
+        camLight.position.copy(pos);
+        camLight.position.y += 0.5;
 
-        const lookT = Math.min(t + 0.05, 0.999);
+        const lookT = Math.min(t + 0.06, 0.999);
         const lookPos = cameraCurve.getPointAt(lookT);
         lookPos.y -= 0.5;
         camera.lookAt(lookPos);
+
+        // Show landing panels
+        const currentLanding = Math.floor(t * numLandings);
+        panels.forEach((p, i) => {
+          const el = p as HTMLElement;
+          const landingT = i / numLandings;
+          const dist = Math.abs(t - landingT);
+          if (dist < 0.08) {
+            el.style.opacity = '1';
+            el.style.transform = 'translateY(0)';
+          } else {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+          }
+        });
 
         renderer.render(scene, camera);
       }
       animateStaircase();
 
       window.addEventListener('resize', () => {
-        if (!container) return;
-        camera.aspect = container.clientWidth / container.clientHeight;
+        const nw = section.clientWidth;
+        camera.aspect = nw / window.innerHeight;
         camera.updateProjectionMatrix();
-        renderer.setSize(container.clientWidth, container.clientHeight);
+        renderer.setSize(nw, window.innerHeight);
       });
     }
   }
 </script>
 
 <style>
-  .staircase-container {
+  .staircase-section {
     position: relative;
     width: 100%;
+    height: 100vh;
   }
-  .staircase-container canvas {
+  .staircase-section canvas {
     width: 100%;
     height: 100vh;
     display: block;
-    background: #050f02;
     border-radius: 12px;
+  }
+  .stair-panel {
+    position: absolute;
+    left: 5%;
+    top: 50%;
+    transform: translateY(20px);
+    width: 300px;
+    background: rgba(6, 13, 4, 0.9);
+    border: 1px solid rgba(90, 186, 50, 0.3);
+    border-radius: 12px;
+    padding: 16px;
+    opacity: 0;
+    transition: opacity 0.4s ease, transform 0.4s ease;
+    z-index: 10;
+    pointer-events: none;
+  }
+  .stair-panel img {
+    width: 100%;
+    aspect-ratio: 3/4;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 12px;
+  }
+  .stair-panel-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    color: #5aba32;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 8px;
+  }
+  .stair-panel-text {
+    font-size: 14px;
+    line-height: 1.6;
+    color: #e8f5e0;
+    opacity: 0.85;
   }
   .mobile-timeline { display: none; }
 
   @media (max-width: 768px) {
-    .staircase-container { display: none !important; }
+    .staircase-section { display: none !important; }
     .mobile-timeline { display: block !important; }
   }
 </style>
