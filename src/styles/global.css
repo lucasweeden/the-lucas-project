@@ -63,6 +63,7 @@ img { max-width: 100%; height: auto; display: block; }
   overflow: hidden;
   min-height: 80vh;
   background: transparent;
+  z-index: 2;
 }
 
 .section-inner {
@@ -101,29 +102,8 @@ img { max-width: 100%; height: auto; display: block; }
   margin-bottom: 48px;
 }
 
-/* --- Global Particle Canvas (Change 14) --- */
-#global-particles {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100vw;
-  height: 100vh;
-  z-index: 1;
-  pointer-events: none;
-}
-
-/* Floating LP coins (Change 14) */
-.floating-lp-coin {
-  position: fixed;
-  width: 45px;
-  height: 45px;
-  pointer-events: none;
-  z-index: 1;
-  animation: lpCoinSpin 7s linear infinite;
-  opacity: 0.5;
-  border-radius: 50%;
-}
-
-@keyframes lpCoinSpin {
+/* Change 10: LP coin background spin */
+@keyframes lpBgCoinSpin {
   0% { transform: rotateY(0deg); }
   100% { transform: rotateY(360deg); }
 }
@@ -611,6 +591,7 @@ img { max-width: 100%; height: auto; display: block; }
 .hero {
   position: relative; height: 100vh; min-height: 700px;
   display: flex; align-items: center; justify-content: center; overflow: hidden;
+  z-index: 2;
 }
 .hero-bg {
   position: absolute; inset: 0; z-index: 0;
@@ -819,17 +800,16 @@ img { max-width: 100%; height: auto; display: block; }
 img[src=""] { display: none; }
 img:not([src]) { display: none; }
 
-/* Persistent floating coin (Change 5) */
+/* Persistent floating coin (Change 4) */
 .persistent-coin {
   position: fixed;
   bottom: 24px; right: 24px;
-  width: 40px; height: 40px;
+  width: 48px; height: 48px;
   z-index: 900;
   border-radius: 50%;
   opacity: 0;
-  transition: opacity 0.5s ease;
   pointer-events: none;
-  animation: persistCoinSpin 3s linear infinite;
+  animation: persistCoinSpin 6s linear infinite;
 }
 .persistent-coin.visible { opacity: 0.7; }
 @keyframes persistCoinSpin { 0% { transform: rotateY(0); } 100% { transform: rotateY(360deg); } }

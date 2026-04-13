@@ -1,46 +1,15 @@
 ---
-// Change 18: updated timeline photos. Change 9: spiral staircase. Change 20: expanded bio.
+// Change 7: Full 3D first-person spiral staircase timeline (Three.js)
+// Uses ScrollTrigger pinning + scrub. Mobile fallback to flat timeline.
 const timeline = [
-  {
-    title: "Born Against the Odds",
-    photo: "IMG_2282.jpeg",
-    text: "Wasn't supposed to be born — both parents were using protection. Born in Oceanside, CA. Learned to swim before I could walk. Moved to Texas at age 2.",
-  },
-  {
-    title: "The Early Hustle",
-    photo: "IMG_2829.jpeg",
-    text: "By age 10, doing door-to-door sales — splitting firewood profits with my great-grandfather. Candy business clearing $1K+/week in middle school. Learned early: positivity always wins.",
-  },
-  {
-    title: "High School Years",
-    photo: "IMG_1218.PNG",
-    text: "Tackle football ages 5–18. Six concussions. Still holds a discus record. Lawn care, reselling, party promoting, Dominos. Senior year: 40+ hours/week while doing school and sports full time.",
-  },
-  {
-    title: "The Leap at 19",
-    photo: "IMG_1426.jpeg",
-    text: "Same week: quit Dominos, got hired at Holden Roofing, bought a new car, signed a new apartment lease — with only a couple thousand dollars to my name. First month: $450K in sales. All-time record. Still unbroken. This is the day I sat down with my mom over lunch and laid out the whole plan — I was leaving Dominos, starting at Holden Roofing, buying a new car, and getting my first apartment. All in the same week. She gave me the push I needed.",
-  },
-  {
-    title: "Building the Career",
-    photo: "FullSizeRender.jpg",
-    text: "$10M+ across 6 years. Co-founded Screaming Eagle Construction — $250K+ profit year one. Priority Roofing: Training MVP, highest commission per job company-wide. Multiple $1M+ months.",
-  },
-  {
-    title: "The Crash",
-    photo: "IMG_5426.jpeg",
-    text: "Desert. Dirt bike. Full send. Blew out the knee — ACL, MCL, LCL, meniscus, everything. Wheelchair. Couldn't get on a roof. Got on a computer instead.",
-  },
-  {
-    title: "The Pivot",
-    photo: "IMG_1770.jpeg",
-    text: "Forced into AI. Found my partner Chase. Built Limitless Roofing Solutions from scratch — an AI-powered CRM for the roofing industry. The setback became the setup.",
-  },
-  {
-    title: "Right Now",
-    photo: "IMG_4848.jpeg",
-    text: "Building in public. Documenting the climb. Living wide open. It's about that time.",
-  },
+  { title: "Born Against the Odds", photo: "IMG_2282.jpeg", text: "Wasn't supposed to be born — both parents were using protection. Born in Oceanside, CA. Learned to swim before I could walk. Moved to Texas at age 2." },
+  { title: "The Early Hustle", photo: "IMG_2829.jpeg", text: "By age 10, doing door-to-door sales splitting firewood profits with my great-grandfather. Candy business clearing $1K+/week in middle school. Learned early: positivity always wins." },
+  { title: "High School Years", photo: "IMG_1218.PNG", text: "Tackle football ages 5–18. Six concussions. Still holds a discus record. Lawn care, reselling, party promoting, Dominos. Senior year: 40+ hours/week while doing school and sports full time." },
+  { title: "The Leap at 19", photo: "IMG_1426.jpeg", text: "Same week: quit Dominos, got hired at Holden Roofing, bought a new car, signed a new apartment lease — with only a couple thousand dollars to my name. This was the day I sat down with my mom and laid out the whole plan. She gave me the push I needed. First month: $450K. All-time record. Still unbroken." },
+  { title: "Building the Career", photo: "FullSizeRender.jpg", text: "$10M+ across 6 years. Co-founded Screaming Eagle Construction — $250K+ profit year one. Priority Roofing: Training MVP, highest commission per job company-wide. Multiple $1M+ months." },
+  { title: "The Crash", photo: "IMG_5426.jpeg", text: "Desert. Dirt bike. Full send. This photo was taken just days before the crash. Blew out the knee — ACL, MCL, LCL, meniscus, everything. Wheelchair. Couldn't get on a roof. Got on a computer instead." },
+  { title: "The Pivot", photo: "IMG_1770.jpeg", text: "Forced into AI. Found my partner Chase. Built Limitless Roofing Solutions from scratch — an AI-powered CRM for the roofing industry. The setback became the setup." },
+  { title: "Right Now", photo: "IMG_4848.jpeg", text: "Building in public. Documenting the climb. Living wide open. It's about that time." },
 ];
 ---
 <section class="site-section" id="about">
@@ -79,32 +48,223 @@ const timeline = [
       </div>
     </div>
 
-    <!-- Timeline — 3D Spiral Staircase (Change 9) -->
     <h3 class="section-title" style="font-size: clamp(36px, 5vw, 64px); text-align: center; margin-top: 80px;" id="story">HOW I GOT HERE</h3>
 
-    <div class="timeline-3d-wrap">
-      <div class="timeline-spine"></div>
-      <div class="timeline-spiral" id="timeline-spiral">
-        {timeline.map((entry, i) => (
-          <div class="spiral-step" data-index={i}>
-            <div class="spiral-dot"></div>
-            <div class="spiral-content">
-              <div class="spiral-title">{entry.title}</div>
-              <p class="spiral-text">{entry.text}</p>
-            </div>
-            <div class="photo-3d">
-              <img
-                src={`/images/${entry.photo}`}
-                alt={entry.title}
-                class="spiral-photo"
-                loading="lazy"
-                onerror="this.parentElement.style.display='none'"
-              />
-              <div class="glare"></div>
-            </div>
+    <!-- 3D Staircase container (desktop) -->
+    <div id="staircase-container" class="staircase-container">
+      <canvas id="staircase-canvas"></canvas>
+    </div>
+
+    <!-- Mobile fallback timeline -->
+    <div class="mobile-timeline" id="mobile-timeline">
+      {timeline.map((entry) => (
+        <div class="spiral-step">
+          <div class="spiral-dot"></div>
+          <div class="spiral-content">
+            <div class="spiral-title">{entry.title}</div>
+            <p class="spiral-text">{entry.text}</p>
           </div>
-        ))}
-      </div>
+          <div class="photo-3d">
+            <img src={`/images/${entry.photo}`} alt={entry.title} class="spiral-photo" loading="lazy" onerror="this.parentElement.style.display='none'" />
+            <div class="glare"></div>
+          </div>
+        </div>
+      ))}
     </div>
   </div>
 </section>
+
+<script>
+  import * as THREE from 'three';
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  const isMobile = window.innerWidth < 768;
+  const container = document.getElementById('staircase-container');
+  const mobileTimeline = document.getElementById('mobile-timeline');
+  const stairCanvas = document.getElementById('staircase-canvas') as HTMLCanvasElement;
+
+  if (isMobile) {
+    if (container) container.style.display = 'none';
+    if (mobileTimeline) mobileTimeline.style.display = 'block';
+    // Animate mobile steps in
+    document.querySelectorAll('#mobile-timeline .spiral-step').forEach((step) => {
+      ScrollTrigger.create({
+        trigger: step, start: 'top 80%',
+        onEnter: () => step.classList.add('visible'),
+      });
+    });
+  } else {
+    if (mobileTimeline) mobileTimeline.style.display = 'none';
+    if (container && stairCanvas) {
+      const timelineData = [
+        { title: "BORN AGAINST THE ODDS", photo: "/images/IMG_2282.jpeg", text: "Wasn't supposed to be born — born in Oceanside, CA. Moved to Texas at age 2." },
+        { title: "THE EARLY HUSTLE", photo: "/images/IMG_2829.jpeg", text: "Door-to-door sales at 10. Candy business clearing $1K+/week in middle school." },
+        { title: "HIGH SCHOOL YEARS", photo: "/images/IMG_1218.PNG", text: "Football ages 5–18. Six concussions. Senior year: 40+ hours/week." },
+        { title: "THE LEAP AT 19", photo: "/images/IMG_1426.jpeg", text: "Quit Dominos. Holden Roofing. New car. New apartment. $450K first month." },
+        { title: "BUILDING THE CAREER", photo: "/images/FullSizeRender.jpg", text: "$10M+ across 6 years. Co-founded Screaming Eagle. Priority Roofing MVP." },
+        { title: "THE CRASH", photo: "/images/IMG_5426.jpeg", text: "Desert. Dirt bike. Full send. ACL, MCL, LCL — everything. Wheelchair." },
+        { title: "THE PIVOT", photo: "/images/IMG_1770.jpeg", text: "Forced into AI. Found Chase. Built Limitless from scratch." },
+        { title: "RIGHT NOW", photo: "/images/IMG_4848.jpeg", text: "Building in public. Living wide open. It's about that time." },
+      ];
+
+      container.style.height = '400vh'; // Tall enough for scroll pinning
+
+      const scene = new THREE.Scene();
+      scene.fog = new THREE.FogExp2(0x050f02, 0.06);
+
+      const camera = new THREE.PerspectiveCamera(65, container.clientWidth / container.clientHeight, 0.1, 100);
+      const renderer = new THREE.WebGLRenderer({ canvas: stairCanvas, alpha: true, antialias: true });
+      renderer.setSize(container.clientWidth, container.clientHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+      // Lighting
+      scene.add(new THREE.AmbientLight(0x1a4d0a, 0.6));
+      const mainLight = new THREE.PointLight(0x5aba32, 2.0, 30);
+      mainLight.position.set(0, 5, 3);
+      scene.add(mainLight);
+
+      // Central pole
+      const poleGeo = new THREE.CylinderGeometry(0.08, 0.08, 40, 16);
+      const poleMat = new THREE.MeshStandardMaterial({ color: 0x3a7a2a, emissive: 0x1a3a10, metalness: 0.6, roughness: 0.3 });
+      const pole = new THREE.Mesh(poleGeo, poleMat);
+      pole.position.y = -15;
+      scene.add(pole);
+
+      // Build spiral steps and landing panels
+      const stepsPerLanding = 4;
+      const stepAngleInc = Math.PI / 6; // 30 deg per step
+      const stepYDrop = -0.45;
+      const stepRadius = 2.5;
+      const stepGeo = new THREE.BoxGeometry(2.2, 0.08, 0.8);
+      const stepMat = new THREE.MeshStandardMaterial({ color: 0x0a1a05, metalness: 0.5, roughness: 0.4 });
+
+      // Camera path points
+      const cameraPoints: THREE.Vector3[] = [];
+      let currentAngle = 0;
+      let currentY = 2;
+
+      for (let landing = 0; landing < timelineData.length; landing++) {
+        // Build steps leading to this landing
+        for (let s = 0; s < stepsPerLanding; s++) {
+          currentAngle += stepAngleInc;
+          currentY += stepYDrop;
+          const sx = Math.cos(currentAngle) * stepRadius;
+          const sz = Math.sin(currentAngle) * stepRadius;
+          const step = new THREE.Mesh(stepGeo, stepMat);
+          step.position.set(sx, currentY, sz);
+          step.rotation.y = -currentAngle + Math.PI / 2;
+          scene.add(step);
+
+          // Step glow
+          const stepLight = new THREE.PointLight(0x3a7a2a, 0.3, 3);
+          stepLight.position.set(sx, currentY + 0.15, sz);
+          scene.add(stepLight);
+        }
+
+        // Camera point at this landing
+        const cx = Math.cos(currentAngle + stepAngleInc * 0.5) * (stepRadius - 0.8);
+        const cz = Math.sin(currentAngle + stepAngleInc * 0.5) * (stepRadius - 0.8);
+        cameraPoints.push(new THREE.Vector3(cx, currentY + 1.6, cz));
+
+        // Landing panel — green orb + text indicator
+        const orbGeo = new THREE.SphereGeometry(0.12, 16, 16);
+        const orbMat = new THREE.MeshBasicMaterial({ color: 0x5aba32 });
+        const orb = new THREE.Mesh(orbGeo, orbMat);
+        const orbX = Math.cos(currentAngle) * (stepRadius + 1);
+        const orbZ = Math.sin(currentAngle) * (stepRadius + 1);
+        orb.position.set(orbX, currentY + 1, orbZ);
+        scene.add(orb);
+
+        // Orb glow
+        const orbLight = new THREE.PointLight(0x5aba32, 0.8, 4);
+        orbLight.position.copy(orb.position);
+        scene.add(orbLight);
+      }
+
+      // Add some dust particles
+      const dustGeo = new THREE.BufferGeometry();
+      const dustPositions = new Float32Array(100 * 3);
+      for (let i = 0; i < 100; i++) {
+        dustPositions[i * 3] = (Math.random() - 0.5) * 10;
+        dustPositions[i * 3 + 1] = Math.random() * -30;
+        dustPositions[i * 3 + 2] = (Math.random() - 0.5) * 10;
+      }
+      dustGeo.setAttribute('position', new THREE.BufferAttribute(dustPositions, 3));
+      const dustMat = new THREE.PointsMaterial({ color: 0x5aba32, size: 0.04, transparent: true, opacity: 0.4 });
+      scene.add(new THREE.Points(dustGeo, dustMat));
+
+      // Camera path curve
+      if (cameraPoints.length < 2) {
+        cameraPoints.push(new THREE.Vector3(0, 0, 3));
+        cameraPoints.push(new THREE.Vector3(0, -5, 3));
+      }
+      const cameraCurve = new THREE.CatmullRomCurve3(cameraPoints);
+
+      // Initial camera
+      const startPos = cameraCurve.getPointAt(0);
+      camera.position.copy(startPos);
+      const lookTarget = cameraCurve.getPointAt(0.02);
+      lookTarget.y -= 0.5;
+      camera.lookAt(lookTarget);
+
+      // Scroll-driven camera movement
+      const scrollData = { progress: 0 };
+      ScrollTrigger.create({
+        trigger: container,
+        start: 'top top',
+        end: 'bottom bottom',
+        scrub: 1,
+        pin: stairCanvas,
+        onUpdate: (self) => {
+          scrollData.progress = self.progress;
+        }
+      });
+
+      function animateStaircase() {
+        requestAnimationFrame(animateStaircase);
+
+        const t = Math.min(scrollData.progress, 0.999);
+        const pos = cameraCurve.getPointAt(t);
+        camera.position.copy(pos);
+
+        const lookT = Math.min(t + 0.05, 0.999);
+        const lookPos = cameraCurve.getPointAt(lookT);
+        lookPos.y -= 0.5;
+        camera.lookAt(lookPos);
+
+        renderer.render(scene, camera);
+      }
+      animateStaircase();
+
+      window.addEventListener('resize', () => {
+        if (!container) return;
+        camera.aspect = container.clientWidth / container.clientHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(container.clientWidth, container.clientHeight);
+      });
+    }
+  }
+</script>
+
+<style>
+  .staircase-container {
+    position: relative;
+    width: 100%;
+  }
+  .staircase-container canvas {
+    width: 100%;
+    height: 100vh;
+    display: block;
+    background: #050f02;
+    border-radius: 12px;
+  }
+  .mobile-timeline { display: none; }
+
+  @media (max-width: 768px) {
+    .staircase-container { display: none !important; }
+    .mobile-timeline { display: block !important; }
+  }
+</style>

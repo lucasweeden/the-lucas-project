@@ -1,29 +1,123 @@
 ---
-// Change 20: added intro paragraph
+// Change 5: No emojis. Change 8: Interactive hover animations per card.
 const wins = [
-  { icon: "💰", title: "$10M+ Career Sales", body: "Six years. Texas roofing. $10 million in residential and commercial jobs." },
-  { icon: "📈", title: "$3.2M Best Year", body: "Multiple $1M+ months in a single year." },
-  { icon: "🏆", title: "$450K First Month", body: "All-time record at Holden Roofing. Set at age 19. Still unbroken." },
-  { icon: "🏢", title: "Hotels & HOAs", body: "Complex commercial projects — navigating committees, HOA groups, and high-stakes negotiations." },
-  { icon: "🔄", title: "Crash → Limitless", body: "Blew out my knee. Got in a wheelchair. Built software. The injury became the company." },
-  { icon: "🥇", title: "MVP & Records", body: "Training Program MVP at Priority Roofing. Highest commission-per-job record company-wide." },
+  { title: "$10M+ Career Sales", body: "Six years. Texas roofing. $10 million in residential and commercial jobs.", hoverAnim: "vibrate" },
+  { title: "$3.2M Best Year", body: "Multiple $1M+ months in a single year.", hoverAnim: "float" },
+  { title: "$450K First Month", body: "All-time record at Holden Roofing. Set at age 19. Still unbroken.", hoverAnim: "spin" },
+  { title: "Hotels & HOAs", body: "Complex commercial projects — navigating committees, HOA groups, and high-stakes negotiations.", hoverAnim: "flip", backText: "Hotels. Condo complexes. HOA committees. The deals nobody else wanted to close." },
+  { title: "Crash → Limitless", body: "Blew out my knee. Got in a wheelchair. Built software. The injury became the company.", hoverAnim: "glow" },
+  { title: "MVP & Records", body: "Training Program MVP at Priority Roofing. Highest commission-per-job record company-wide.", hoverAnim: "tiltscale" },
 ];
 ---
 <section class="site-section" id="wins">
-  <div class="section-inner">
+  <div class="section-inner" style="overflow: hidden;">
     <div class="section-label">05 — The Proof</div>
     <h2 class="section-title">WINS & MILESTONES</h2>
     <p style="font-size: 18px; line-height: 1.8; opacity: 0.8; max-width: 700px; margin-bottom: 48px;">
       These aren't flex posts. They're proof that the process works — that showing up, staying consistent, and refusing to quit compounds into something real. Every number on this page has a story behind it.
     </p>
     <div class="two-col-cards">
-      {wins.map((win) => (
-        <div class="card tilt-card">
-          <div class="card-icon">{win.icon}</div>
-          <div class="card-title">{win.title}</div>
-          <div class="card-body">{win.body}</div>
+      {wins.map((win, i) => (
+        <div class={`card tilt-card win-card`} data-win-anim={win.hoverAnim} data-back-text={win.backText || ''}>
+          <div class="win-card-front">
+            <div class="card-title">{win.title}</div>
+            <div class="card-body">{win.body}</div>
+          </div>
+          {win.backText && (
+            <div class="win-card-back">
+              <div class="card-body" style="opacity: 1;">{win.backText}</div>
+            </div>
+          )}
         </div>
       ))}
     </div>
   </div>
 </section>
+
+<script>
+  document.querySelectorAll('.win-card').forEach((card) => {
+    const el = card as HTMLElement;
+    const anim = el.dataset.winAnim;
+
+    el.addEventListener('mouseenter', () => {
+      switch (anim) {
+        case 'vibrate':
+          el.style.animation = 'winVibrate 80ms ease-in-out 7';
+          setTimeout(() => { el.style.animation = ''; }, 600);
+          break;
+        case 'float':
+          el.style.animation = 'winFloat 800ms ease-in-out infinite';
+          break;
+        case 'spin':
+          el.style.animation = 'winSpin 600ms cubic-bezier(0.22, 1, 0.36, 1) forwards';
+          break;
+        case 'flip':
+          el.style.animation = 'winFlipIn 500ms ease forwards';
+          const front = el.querySelector('.win-card-front') as HTMLElement;
+          const back = el.querySelector('.win-card-back') as HTMLElement;
+          if (front) front.style.opacity = '0';
+          if (back) back.style.opacity = '1';
+          break;
+        case 'glow':
+          el.style.animation = 'winGlow 400ms ease-in-out infinite';
+          break;
+        case 'tiltscale':
+          el.style.animation = 'winTiltScale 500ms ease forwards';
+          break;
+      }
+    });
+
+    el.addEventListener('mouseleave', () => {
+      el.style.animation = '';
+      if (anim === 'flip') {
+        el.style.animation = 'winFlipOut 500ms ease forwards';
+        const front = el.querySelector('.win-card-front') as HTMLElement;
+        const back = el.querySelector('.win-card-back') as HTMLElement;
+        if (front) front.style.opacity = '1';
+        if (back) back.style.opacity = '0';
+      }
+    });
+  });
+</script>
+
+<style>
+  .win-card { position: relative; overflow: hidden; transform-style: preserve-3d; }
+  .win-card-front, .win-card-back { transition: opacity 0.3s ease; }
+  .win-card-back {
+    position: absolute; inset: 0; padding: 36px;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; font-style: italic;
+  }
+
+  @keyframes winVibrate {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-3px); }
+    75% { transform: translateX(3px); }
+  }
+  @keyframes winFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-12px); }
+  }
+  @keyframes winSpin {
+    0% { transform: perspective(800px) rotateY(0); }
+    100% { transform: perspective(800px) rotateY(360deg); }
+  }
+  @keyframes winFlipIn {
+    0% { transform: perspective(800px) rotateX(0); }
+    100% { transform: perspective(800px) rotateX(180deg); }
+  }
+  @keyframes winFlipOut {
+    0% { transform: perspective(800px) rotateX(180deg); }
+    100% { transform: perspective(800px) rotateX(0); }
+  }
+  @keyframes winGlow {
+    0%, 100% { box-shadow: 0 0 0 rgba(90,186,50,0); }
+    50% { box-shadow: 0 0 30px rgba(90,186,50,0.6); }
+  }
+  @keyframes winTiltScale {
+    0% { transform: scale(1) rotateZ(0); }
+    30% { transform: scale(1.08) rotateZ(-3deg); }
+    60% { transform: scale(1.08) rotateZ(3deg); }
+    100% { transform: scale(1.08) rotateZ(0); }
+  }
+</style>
