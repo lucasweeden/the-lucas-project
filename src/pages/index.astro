@@ -23,6 +23,27 @@ import Footer from '../components/Footer.astro';
   <Nav />
   <CustomCursor />
 
+  <!-- Global particle canvas (Change 14) -->
+  <canvas id="global-particles"></canvas>
+
+  <!-- Floating LP coins (Change 14) -->
+  {Array.from({ length: 18 }).map((_, i) => (
+    <img
+      src="/images/smallLucas_Project_Logo.png"
+      alt=""
+      class="floating-lp-coin"
+      style={`
+        top: ${5 + Math.floor((i * 37) % 90)}vh;
+        left: ${3 + Math.floor((i * 53) % 92)}vw;
+        animation-delay: ${(i * 0.4).toFixed(1)}s;
+        animation-duration: ${6 + (i % 3)}s;
+        opacity: ${(0.25 + (i % 4) * 0.1).toFixed(2)};
+        width: ${40 + (i % 4) * 5}px;
+        height: ${40 + (i % 4) * 5}px;
+      `}
+    />
+  ))}
+
   <main>
     <Hero />
     <LucasProject />
@@ -40,14 +61,15 @@ import Footer from '../components/Footer.astro';
 </Layout>
 
 <script>
-  import { initParticleCanvas } from '../scripts/particles';
+  import { initGlobalParticles } from '../scripts/particles';
   import { initAnimations } from '../scripts/animations';
 
   document.addEventListener('DOMContentLoaded', () => {
-    // Initialize all particle canvases
-    document.querySelectorAll('.particle-canvas').forEach((canvas) => {
-      initParticleCanvas(canvas as HTMLCanvasElement);
-    });
+    // Initialize global particle canvas (Change 14)
+    const globalCanvas = document.getElementById('global-particles') as HTMLCanvasElement;
+    if (globalCanvas) {
+      initGlobalParticles(globalCanvas);
+    }
 
     // Initialize GSAP animations
     initAnimations();

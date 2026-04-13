@@ -1,4 +1,11 @@
 ---
+const links = [
+  { href: "#about", label: "About" },
+  { href: "#building", label: "Work" },
+  { href: "#story", label: "Story" },
+  { href: "#ventures", label: "Ventures" },
+  { href: "#contact", label: "Contact" },
+];
 ---
 <nav class="site-nav" id="site-nav">
   <div class="nav-left">
@@ -6,11 +13,14 @@
     <span class="nav-name">Lucas Weeden</span>
   </div>
   <div class="nav-center">
-    <a href="#about" class="nav-link">About</a>
-    <a href="#building" class="nav-link">Work</a>
-    <a href="#story" class="nav-link">Story</a>
-    <a href="#ventures" class="nav-link">Ventures</a>
-    <a href="#contact" class="nav-link">Contact</a>
+    {links.map((l) => (
+      <div class="nav-pill">
+        <a href={l.href} class="nav-pill-inner">
+          <span class="nav-pill-front">{l.label}</span>
+          <span class="nav-pill-back">{l.label}</span>
+        </a>
+      </div>
+    ))}
   </div>
   <div class="nav-right">
     <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
@@ -26,11 +36,9 @@
 </nav>
 
 <div class="mobile-nav" id="mobile-nav">
-  <a href="#about" class="mobile-nav-link">About</a>
-  <a href="#building" class="mobile-nav-link">Work</a>
-  <a href="#story" class="mobile-nav-link">Story</a>
-  <a href="#ventures" class="mobile-nav-link">Ventures</a>
-  <a href="#contact" class="mobile-nav-link">Contact</a>
+  {links.map((l) => (
+    <a href={l.href} class="mobile-nav-link">{l.label}</a>
+  ))}
 </div>
 
 <script>

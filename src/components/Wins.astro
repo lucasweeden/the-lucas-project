@@ -1,4 +1,5 @@
 ---
+// Change 20: added intro paragraph
 const wins = [
   { icon: "💰", title: "$10M+ Career Sales", body: "Six years. Texas roofing. $10 million in residential and commercial jobs." },
   { icon: "📈", title: "$3.2M Best Year", body: "Multiple $1M+ months in a single year." },
@@ -8,11 +9,13 @@ const wins = [
   { icon: "🥇", title: "MVP & Records", body: "Training Program MVP at Priority Roofing. Highest commission-per-job record company-wide." },
 ];
 ---
-<section class="site-section section-coral" id="wins">
-  <canvas class="particle-canvas" data-particles="130" data-shape="hexagon" data-color="232,96,80"></canvas>
+<section class="site-section" id="wins">
   <div class="section-inner">
     <div class="section-label">05 — The Proof</div>
     <h2 class="section-title">WINS & MILESTONES</h2>
+    <p style="font-size: 18px; line-height: 1.8; opacity: 0.8; max-width: 700px; margin-bottom: 48px;">
+      These aren't flex posts. They're proof that the process works — that showing up, staying consistent, and refusing to quit compounds into something real. Every number on this page has a story behind it.
+    </p>
     <div class="two-col-cards">
       {wins.map((win) => (
         <div class="card tilt-card">

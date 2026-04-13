@@ -1,24 +1,26 @@
 ---
+// Change 11: LP logo icons + unique animations per card
 const socials = [
-  { platform: "YouTube", handle: "@the.lucas.project", url: "https://youtube.com/@the.lucas.project.1", icon: "▶" },
-  { platform: "Instagram", handle: "@the.lucas.project", url: "https://www.instagram.com/the.lucas.project", icon: "📷" },
-  { platform: "TikTok", handle: "@lucas.project", url: "https://www.tiktok.com/@lucas.project", icon: "🎵" },
-  { platform: "LinkedIn", handle: "Lucas Weeden", url: "https://www.linkedin.com/in/lucas-weeden-6721133bb", icon: "💼" },
-  { platform: "Facebook", handle: "The Lucas Project", url: "https://www.facebook.com/share/18Th9LsXYL/", icon: "👤" },
-  { platform: "Threads", handle: "@the.lucas.project", url: "https://www.threads.com/@the.lucas.project", icon: "🧵" },
-  { platform: "Snapchat", handle: "lucas.weeden", url: "https://snapchat.com/t/66goy6LY", icon: "👻" },
-  { platform: "Instagram", handle: "@lucas.weeden", url: "https://www.instagram.com/lucas.weeden", icon: "📸" },
+  { platform: "YouTube", handle: "@the.lucas.project", url: "https://youtube.com/@the.lucas.project.1", anim: "bounce" },
+  { platform: "Instagram", handle: "@the.lucas.project", url: "https://www.instagram.com/the.lucas.project", anim: "spin" },
+  { platform: "TikTok", handle: "@lucas.project", url: "https://www.tiktok.com/@lucas.project", anim: "wiggle" },
+  { platform: "LinkedIn", handle: "Lucas Weeden", url: "https://www.linkedin.com/in/lucas-weeden-6721133bb", anim: "slide" },
+  { platform: "Facebook", handle: "The Lucas Project", url: "https://www.facebook.com/share/18Th9LsXYL/", anim: "pulse" },
+  { platform: "Threads", handle: "@the.lucas.project", url: "https://www.threads.com/@the.lucas.project", anim: "rock" },
+  { platform: "Snapchat", handle: "lucas.weeden", url: "https://snapchat.com/t/66goy6LY", anim: "flip" },
+  { platform: "Instagram", handle: "@lucas.weeden", url: "https://www.instagram.com/lucas.weeden", anim: "glow" },
 ];
 ---
-<section class="site-section section-teal" id="social">
-  <canvas class="particle-canvas" data-particles="110" data-shape="diamond" data-color="61,216,197"></canvas>
+<section class="site-section" id="social">
   <div class="section-inner">
     <div class="section-label">08 — Stay Connected</div>
     <h2 class="section-title">FOLLOW THE JOURNEY</h2>
     <div class="social-grid">
       {socials.map((s) => (
-        <a href={s.url} target="_blank" rel="noopener" class="social-card">
-          <div class="social-icon">{s.icon}</div>
+        <a href={s.url} target="_blank" rel="noopener" class="social-card" data-anim={s.anim}>
+          <div class="social-icon">
+            <img src="/images/smallLucas_Project_Logo.png" alt="LP" />
+          </div>
           <div class="social-platform">{s.platform}</div>
           <div class="social-handle">{s.handle}</div>
         </a>
@@ -26,3 +28,18 @@ const socials = [
     </div>
   </div>
 </section>
+
+<script>
+  // Activate social card animations when scrolled into view
+  const socialGrid = document.querySelector('.social-grid');
+  if (socialGrid) {
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        socialGrid.querySelectorAll('.social-card').forEach((card, i) => {
+          setTimeout(() => card.classList.add('anim-active'), i * 100);
+        });
+      }
+    }, { threshold: 0.3 });
+    observer.observe(socialGrid);
+  }
+</script>
