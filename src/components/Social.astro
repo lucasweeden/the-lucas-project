@@ -1,0 +1,28 @@
+---
+const socials = [
+  { platform: "YouTube", handle: "@the.lucas.project", url: "https://youtube.com/@the.lucas.project.1", icon: "▶" },
+  { platform: "Instagram", handle: "@the.lucas.project", url: "https://www.instagram.com/the.lucas.project", icon: "📷" },
+  { platform: "TikTok", handle: "@lucas.project", url: "https://www.tiktok.com/@lucas.project", icon: "🎵" },
+  { platform: "LinkedIn", handle: "Lucas Weeden", url: "https://www.linkedin.com/in/lucas-weeden-6721133bb", icon: "💼" },
+  { platform: "Facebook", handle: "The Lucas Project", url: "https://www.facebook.com/share/18Th9LsXYL/", icon: "👤" },
+  { platform: "Threads", handle: "@the.lucas.project", url: "https://www.threads.com/@the.lucas.project", icon: "🧵" },
+  { platform: "Snapchat", handle: "lucas.weeden", url: "https://snapchat.com/t/66goy6LY", icon: "👻" },
+  { platform: "Instagram", handle: "@lucas.weeden", url: "https://www.instagram.com/lucas.weeden", icon: "📸" },
+];
+---
+<section class="site-section section-teal" id="social">
+  <canvas class="particle-canvas" data-particles="110" data-shape="diamond" data-color="61,216,197"></canvas>
+  <div class="section-inner">
+    <div class="section-label">08 — Stay Connected</div>
+    <h2 class="section-title">FOLLOW THE JOURNEY</h2>
+    <div class="social-grid">
+      {socials.map((s) => (
+        <a href={s.url} target="_blank" rel="noopener" class="social-card">
+          <div class="social-icon">{s.icon}</div>
+          <div class="social-platform">{s.platform}</div>
+          <div class="social-handle">{s.handle}</div>
+        </a>
+      ))}
+    </div>
+  </div>
+</section>

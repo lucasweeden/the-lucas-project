@@ -1,0 +1,102 @@
+---
+const timeline = [
+  {
+    title: "Born Against the Odds",
+    photo: "IMG_1501.jpeg",
+    text: "Wasn't supposed to be born — both parents were using protection. Born in Oceanside, CA. Learned to swim before I could walk. Moved to Texas at age 2.",
+  },
+  {
+    title: "The Early Hustle",
+    photo: "IMG_1345.PNG",
+    text: "By age 10, doing door-to-door sales — splitting firewood profits with my great-grandfather. Candy business clearing $1K+/week in middle school. Learned early: positivity always wins.",
+  },
+  {
+    title: "High School Years",
+    photo: "IMG_1218.PNG",
+    text: "Tackle football ages 5–18. Six concussions. Still holds a discus record. Lawn care, reselling, party promoting, Dominos. Senior year: 40+ hours/week while doing school and sports full time.",
+  },
+  {
+    title: "The Leap at 19",
+    photo: "IMG_9474.jpeg",
+    text: "Same week: quit Dominos, got hired at Holden Roofing, bought a new car, signed a new apartment lease — with only a couple thousand dollars to my name. First month: $450K in sales. All-time record. Still unbroken.",
+  },
+  {
+    title: "Building the Career",
+    photo: "IMG_1053.jpeg",
+    text: "$10M+ across 6 years. Co-founded Screaming Eagle Construction — $250K+ profit year one. Priority Roofing: Training MVP, highest commission per job company-wide. Multiple $1M+ months.",
+  },
+  {
+    title: "The Crash",
+    photo: "IMG_1078.jpeg",
+    text: "Desert. Dirt bike. Full send. Blew out the knee — ACL, MCL, LCL, meniscus, everything. Wheelchair. Couldn't get on a roof. Got on a computer instead.",
+  },
+  {
+    title: "The Pivot",
+    photo: "IMG_3426.jpeg",
+    text: "Forced into AI. Found my partner Chase. Built Limitless Roofing Solutions from scratch — an AI-powered CRM for the roofing industry. The setback became the setup.",
+  },
+  {
+    title: "Right Now",
+    photo: "IMG_4848.jpeg",
+    text: "Building in public. Documenting the climb. Living wide open. It's about that time.",
+  },
+];
+---
+<section class="site-section section-amber" id="about">
+  <canvas class="particle-canvas" data-particles="140" data-shape="line" data-color="212,168,67"></canvas>
+  <div class="section-inner">
+    <div class="section-label">04 — The Man</div>
+    <h2 class="section-title">ABOUT LUCAS</h2>
+
+    <div class="two-col" style="margin-bottom: 60px;">
+      <div>
+        <img src="/images/IMG_4848.jpeg" alt="Lucas hiking with dogs" class="section-portrait" loading="lazy" />
+      </div>
+      <div>
+        <blockquote class="pull-quote">
+          "I'd rather build something that scares me than settle for something that doesn't."
+        </blockquote>
+        <p style="font-size: 18px; line-height: 1.8; opacity: 0.85;">
+          Builder, operator, creator. $10M+ in roof sales. Blown-out knee. Pivoted to AI. Every chapter earned, not given. Based in Texas.
+        </p>
+        <div class="stats-bar">
+          <div class="stat-item">
+            <div class="stat-number" data-count="10">$0</div>
+            <div class="stat-label">Roof Sales (M+)</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number" data-count="6">0</div>
+            <div class="stat-label">Years In The Game</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number" data-count="3.2">$0</div>
+            <div class="stat-label">Best Year (M)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Timeline -->
+    <h3 class="section-title" style="font-size: clamp(36px, 5vw, 64px); text-align: center; margin-top: 80px;" id="story">HOW I GOT HERE</h3>
+    <div class="timeline">
+      {timeline.map((entry, i) => (
+        <div class="timeline-entry">
+          <div class="timeline-content">
+            <div class="timeline-title">{entry.title}</div>
+            <p class="timeline-text">{entry.text}</p>
+          </div>
+          <div class="timeline-dot"></div>
+          <div class="timeline-media">
+            <img
+              src={`/images/${entry.photo}`}
+              alt={entry.title}
+              class="timeline-photo"
+              loading="lazy"
+              onerror="this.style.display='none'"
+            />
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>

@@ -1,0 +1,26 @@
+---
+const wins = [
+  { icon: "💰", title: "$10M+ Career Sales", body: "Six years. Texas roofing. $10 million in residential and commercial jobs." },
+  { icon: "📈", title: "$3.2M Best Year", body: "Multiple $1M+ months in a single year." },
+  { icon: "🏆", title: "$450K First Month", body: "All-time record at Holden Roofing. Set at age 19. Still unbroken." },
+  { icon: "🏢", title: "Hotels & HOAs", body: "Complex commercial projects — navigating committees, HOA groups, and high-stakes negotiations." },
+  { icon: "🔄", title: "Crash → Limitless", body: "Blew out my knee. Got in a wheelchair. Built software. The injury became the company." },
+  { icon: "🥇", title: "MVP & Records", body: "Training Program MVP at Priority Roofing. Highest commission-per-job record company-wide." },
+];
+---
+<section class="site-section section-coral" id="wins">
+  <canvas class="particle-canvas" data-particles="130" data-shape="hexagon" data-color="232,96,80"></canvas>
+  <div class="section-inner">
+    <div class="section-label">05 — The Proof</div>
+    <h2 class="section-title">WINS & MILESTONES</h2>
+    <div class="two-col-cards">
+      {wins.map((win) => (
+        <div class="card tilt-card">
+          <div class="card-icon">{win.icon}</div>
+          <div class="card-title">{win.title}</div>
+          <div class="card-body">{win.body}</div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>

@@ -1,0 +1,48 @@
+---
+interface Props {
+  title?: string;
+}
+const { title = "Lucas Weeden — Builder · Operator · Creator" } = Astro.props;
+---
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{title}</title>
+  <meta name="description" content="The Lucas Project — documenting the real-time build of businesses, brands, and a life lived wide open. $10M+ in sales, AI pivot, and always building." />
+  <meta property="og:title" content="Lucas Weeden — The Lucas Project" />
+  <meta property="og:description" content="Builder. Operator. Creator. It's about that time." />
+  <meta property="og:url" content="https://lucasweeden.com" />
+  <meta property="og:type" content="website" />
+  <link rel="canonical" href="https://lucasweeden.com" />
+  <link rel="icon" type="image/png" href="/images/smallLucas_Project_Logo.png" />
+  <link rel="preload" href="/images/IMG_1530.jpeg" as="image" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script is:inline>
+    (function() {
+      var saved = localStorage.getItem('lw-theme');
+      if (saved) {
+        document.documentElement.setAttribute('data-theme', saved);
+      } else {
+        var h = new Date().getHours();
+        document.documentElement.setAttribute('data-theme', (h >= 6 && h < 19) ? 'light' : 'dark');
+      }
+    })();
+  </script>
+</head>
+<body>
+  <slot />
+</body>
+</html>
+
+<style is:global>
+  @import '@fontsource/bebas-neue/400.css';
+  @import '@fontsource/cormorant-garamond/400.css';
+  @import '@fontsource/cormorant-garamond/400-italic.css';
+  @import '@fontsource/cormorant-garamond/600.css';
+  @import '@fontsource/cormorant-garamond/700.css';
+  @import '../styles/global.css';
+</style>

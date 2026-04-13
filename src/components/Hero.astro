@@ -1,0 +1,176 @@
+---
+---
+<section class="hero" id="hero">
+  <div class="hero-bg">
+    <img src="/images/IMG_1530.jpeg" alt="" loading="eager" />
+  </div>
+  <canvas class="hero-canvas" id="hero-canvas"></canvas>
+  <div class="hero-content">
+    <div class="hero-label">THE LUCAS PROJECT</div>
+    <div class="hero-title-line">LUCAS</div>
+    <div class="hero-title-line hero-title-outline">WEEDEN</div>
+    <div class="hero-tagline">Builder &middot; Operator &middot; Creator</div>
+    <div class="hero-cta">
+      <a href="#lucas-project" class="btn-ghost">Build your dreams or build someone else's</a>
+    </div>
+  </div>
+  <div class="scroll-indicator">
+    <span>Scroll</span>
+    <div class="arrow"></div>
+  </div>
+</section>
+
+<script>
+  import * as THREE from 'three';
+
+  const canvas = document.getElementById('hero-canvas') as HTMLCanvasElement;
+  if (canvas) {
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100);
+    camera.position.z = 5;
+
+    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+    // Lighting
+    const ambient = new THREE.AmbientLight(0x1a4d0a, 0.4);
+    scene.add(ambient);
+    const pointLight1 = new THREE.PointLight(0x5aba32, 2.0, 20);
+    pointLight1.position.set(3, 3, 4);
+    scene.add(pointLight1);
+    const pointLight2 = new THREE.PointLight(0x8cd867, 1.0, 20);
+    pointLight2.position.set(-3, -2, 3);
+    scene.add(pointLight2);
+
+    // Load LP logo texture
+    const textureLoader = new THREE.TextureLoader();
+    const logoTexture = textureLoader.load('/images/smallLucas_Project_Logo.png');
+    logoTexture.colorSpace = THREE.SRGBColorSpace;
+
+    // Main coin
+    const coinGeo = new THREE.CylinderGeometry(1.2, 1.2, 0.15, 64);
+    const coinMaterials = [
+      new THREE.MeshStandardMaterial({ color: 0x2a6a1a, metalness: 0.6, roughness: 0.3 }), // side
+      new THREE.MeshStandardMaterial({ map: logoTexture, metalness: 0.3, roughness: 0.4 }), // top
+      new THREE.MeshStandardMaterial({ map: logoTexture, metalness: 0.3, roughness: 0.4 }), // bottom
+    ];
+    const coin = new THREE.Mesh(coinGeo, coinMaterials);
+    coin.rotation.x = Math.PI * 0.1;
+    scene.add(coin);
+
+    // Rim glow
+    const glowGeo = new THREE.CylinderGeometry(1.35, 1.35, 0.18, 64);
+    const glowMat = new THREE.MeshBasicMaterial({
+      color: 0x5aba32,
+      transparent: true,
+      opacity: 0.12,
+      blending: THREE.AdditiveBlending,
+    });
+    const glow = new THREE.Mesh(glowGeo, glowMat);
+    glow.rotation.x = coin.rotation.x;
+    scene.add(glow);
+
+    // Background coins
+    interface BgCoin {
+      mesh: THREE.Mesh;
+      vx: number;
+      vy: number;
+      rotSpeed: number;
+      baseX: number;
+      baseY: number;
+    }
+    const bgCoins: BgCoin[] = [];
+    const bgGeo = new THREE.CylinderGeometry(1, 1, 0.1, 32);
+
+    for (let i = 0; i < 50; i++) {
+      const scale = 0.15 + Math.random() * 0.45;
+      const bgMat = new THREE.MeshStandardMaterial({
+        map: logoTexture,
+        metalness: 0.4,
+        roughness: 0.5,
+        transparent: true,
+        opacity: 0.3 + Math.random() * 0.5,
+      });
+      const bgCoin = new THREE.Mesh(bgGeo, bgMat);
+      bgCoin.scale.set(scale, scale, scale);
+      const x = (Math.random() - 0.5) * 16;
+      const y = (Math.random() - 0.5) * 16;
+      const z = -5 - Math.random() * 10;
+      bgCoin.position.set(x, y, z);
+      bgCoin.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, 0);
+      scene.add(bgCoin);
+      bgCoins.push({
+        mesh: bgCoin,
+        vx: 0, vy: 0,
+        rotSpeed: (Math.random() - 0.5) * 0.02,
+        baseX: x, baseY: y,
+      });
+    }
+
+    // Mouse tracking
+    let mouseNX = 0, mouseNY = 0;
+
+    document.addEventListener('mousemove', (e) => {
+      mouseNX = (e.clientX / window.innerWidth) * 2 - 1;
+      mouseNY = -(e.clientY / window.innerHeight) * 2 + 1;
+    });
+
+    // Intersection observer to pause when not visible
+    let isVisible = true;
+    const observer = new IntersectionObserver(([entry]) => {
+      isVisible = entry.isIntersecting;
+    }, { threshold: 0.1 });
+    const heroSection = document.getElementById('hero');
+    if (heroSection) observer.observe(heroSection);
+
+    // Animation loop
+    function animate() {
+      requestAnimationFrame(animate);
+      if (!isVisible) return;
+
+      // Main coin rotation + tilt
+      coin.rotation.y += 0.003;
+      coin.rotation.x = Math.PI * 0.1 + mouseNY * 0.4;
+      coin.rotation.z = mouseNX * 0.4;
+      glow.rotation.y = coin.rotation.y;
+      glow.rotation.x = coin.rotation.x;
+      glow.rotation.z = coin.rotation.z;
+
+      // Background coins
+      bgCoins.forEach((bc) => {
+        bc.mesh.rotation.y += bc.rotSpeed;
+        bc.mesh.rotation.x += bc.rotSpeed * 0.5;
+
+        // Mouse repulsion
+        const dx = bc.mesh.position.x - mouseNX * 5;
+        const dy = bc.mesh.position.y - mouseNY * 5;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 3) {
+          const force = (3 - dist) * 0.005;
+          bc.vx += (dx / dist) * force;
+          bc.vy += (dy / dist) * force;
+        }
+
+        // Spring back to base
+        bc.vx += (bc.baseX - bc.mesh.position.x) * 0.002;
+        bc.vy += (bc.baseY - bc.mesh.position.y) * 0.002;
+        bc.vx *= 0.98;
+        bc.vy *= 0.98;
+
+        bc.mesh.position.x += bc.vx;
+        bc.mesh.position.y += bc.vy;
+      });
+
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    // Resize
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  }
+</script>

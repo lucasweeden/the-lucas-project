@@ -1,0 +1,67 @@
+---
+---
+<div class="custom-cursor" id="custom-cursor">
+  <div class="cursor-dot" id="cursor-dot">LP</div>
+  <div class="cursor-ring" id="cursor-ring"></div>
+</div>
+
+<script>
+  if (window.matchMedia('(pointer: fine)').matches && window.innerWidth > 768) {
+    const cursor = document.getElementById('custom-cursor')!;
+    const dot = document.getElementById('cursor-dot')!;
+    const ring = document.getElementById('cursor-ring')!;
+
+    let mouseX = 0, mouseY = 0;
+    let dotX = 0, dotY = 0;
+    let ringX = 0, ringY = 0;
+    let lastSparkle = 0;
+
+    document.addEventListener('mousemove', (e) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+
+      // Sparkle particles
+      const now = Date.now();
+      if (now - lastSparkle > 50) {
+        lastSparkle = now;
+        const sparkle = document.createElement('div');
+        sparkle.className = 'cursor-sparkle';
+        sparkle.style.left = mouseX + 'px';
+        sparkle.style.top = mouseY + 'px';
+        document.body.appendChild(sparkle);
+        setTimeout(() => sparkle.remove(), 600);
+      }
+    });
+
+    // Hover detection
+    const hoverTargets = 'a, button, .gallery-card, .card, .social-card, .btn-ghost, .contact-email-btn';
+    document.addEventListener('mouseover', (e) => {
+      if ((e.target as Element)?.closest(hoverTargets)) {
+        ring.classList.add('hovering');
+      }
+    });
+    document.addEventListener('mouseout', (e) => {
+      if ((e.target as Element)?.closest(hoverTargets)) {
+        ring.classList.remove('hovering');
+      }
+    });
+
+    function animate() {
+      dotX += (mouseX - dotX) * 0.15;
+      dotY += (mouseY - dotY) * 0.15;
+      ringX += (mouseX - ringX) * 0.08;
+      ringY += (mouseY - ringY) * 0.08;
+
+      dot.style.left = dotX + 'px';
+      dot.style.top = dotY + 'px';
+      ring.style.left = ringX + 'px';
+      ring.style.top = ringY + 'px';
+
+      requestAnimationFrame(animate);
+    }
+    animate();
+  } else {
+    const cursor = document.getElementById('custom-cursor');
+    if (cursor) cursor.style.display = 'none';
+  }
+</script>

@@ -1,0 +1,46 @@
+---
+---
+<div class="loading-screen" id="loading-screen">
+  <img src="/images/Lucas_Project_Logo_-_6.png" alt="LP" class="loading-logo" />
+  <div class="loading-text" id="loading-text">
+    {Array.from("IT'S ABOUT THAT TIME").map((char, i) => (
+      <span style={`animation-delay: ${i * 0.06}s`}>{char === ' ' ? '\u00A0' : char}</span>
+    ))}
+  </div>
+  <div class="loading-bar-track">
+    <div class="loading-bar-fill" id="loading-bar"></div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const bar = document.getElementById('loading-bar');
+    const screen = document.getElementById('loading-screen');
+    const letters = document.querySelectorAll('#loading-text span');
+
+    // Animate letters in
+    letters.forEach((span, i) => {
+      setTimeout(() => {
+        (span as HTMLElement).style.opacity = '1';
+        (span as HTMLElement).style.transform = 'translateY(0)';
+        (span as HTMLElement).style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+      }, i * 60);
+    });
+
+    // Animate progress bar
+    let progress = 0;
+    const interval = setInterval(() => {
+      progress += 2;
+      if (bar) bar.style.width = progress + '%';
+      if (progress >= 100) {
+        clearInterval(interval);
+        setTimeout(() => {
+          screen?.classList.add('done');
+          setTimeout(() => {
+            if (screen) screen.style.display = 'none';
+          }, 600);
+        }, 200);
+      }
+    }, 40);
+  });
+</script>

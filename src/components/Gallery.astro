@@ -1,0 +1,105 @@
+---
+const photos = [
+  { src: "IMG_4863.jpeg", caption: "Golden Hour" },
+  { src: "IMG_1530.jpeg", caption: "Powder Days" },
+  { src: "IMG_6652.jpeg", caption: "On Stage" },
+  { src: "IMG_3496.jpeg", caption: "Saddle Up" },
+  { src: "IMG_4898.jpeg", caption: "Dressed Up" },
+  { src: "IMG_2047.jpeg", caption: "Texas Made" },
+  { src: "IMG_9474.jpeg", caption: "Night Out" },
+  { src: "IMG_0717.jpeg", caption: "Island Life" },
+  { src: "IMG_1001.jpeg", caption: "Golden Fields" },
+  { src: "IMG_4459.jpeg", caption: "Acoustic" },
+  { src: "IMG_2720.jpeg", caption: "Road Trip" },
+  { src: "IMG_4848.jpeg", caption: "Pack Walk" },
+  { src: "IMG_0856.jpeg", caption: "Camp Life" },
+  { src: "IMG_1218.PNG", caption: "Game Day" },
+  { src: "IMG_1345.PNG", caption: "Origins" },
+  { src: "IMG_0045.jpeg", caption: "Good Times" },
+  { src: "IMG_5426.jpeg", caption: "Sand Dunes" },
+  { src: "IMG_2282.jpeg", caption: "The Grind" },
+  { src: "IMG_4463.jpeg", caption: "Festival" },
+  { src: "IMG_1426.jpeg", caption: "Family" },
+  { src: "IMG_1053.jpeg", caption: "On The Roof" },
+  { src: "IMG_8617.jpeg", caption: "Back On The Roof" },
+  { src: "IMG_2975.jpeg", caption: "Best Friend" },
+  { src: "IMG_1770.jpeg", caption: "Disco Vibes" },
+];
+---
+<section class="site-section section-teal" id="gallery">
+  <canvas class="particle-canvas" data-particles="180" data-shape="diamond" data-color="61,216,197"></canvas>
+  <div class="section-inner">
+    <div class="section-label">02 — The Life</div>
+    <h2 class="section-title">LIVING WIDE OPEN</h2>
+    <p class="section-subtitle">No filter. No highlight reel. Just the climb.</p>
+  </div>
+  <div class="gallery-track" id="gallery-track">
+    {photos.map((photo) => (
+      <div class="gallery-card" data-src={`/images/${photo.src}`} data-caption={photo.caption}>
+        <img src={`/images/${photo.src}`} alt={photo.caption} loading="lazy" onerror="this.parentElement.style.display='none'" />
+        <div class="caption">{photo.caption}</div>
+      </div>
+    ))}
+  </div>
+</section>
+
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox">
+  <button class="lightbox-close" id="lightbox-close">&times;</button>
+  <img id="lightbox-img" src="" alt="" />
+  <div class="lightbox-caption" id="lightbox-caption"></div>
+</div>
+
+<script>
+  const track = document.getElementById('gallery-track');
+  const lightbox = document.getElementById('lightbox');
+  const lbImg = document.getElementById('lightbox-img') as HTMLImageElement;
+  const lbCaption = document.getElementById('lightbox-caption');
+  const lbClose = document.getElementById('lightbox-close');
+
+  // Drag to scroll
+  if (track) {
+    let isDown = false;
+    let startX: number;
+    let scrollLeft: number;
+
+    track.addEventListener('mousedown', (e) => {
+      isDown = true;
+      startX = e.pageX - track.offsetLeft;
+      scrollLeft = track.scrollLeft;
+    });
+    track.addEventListener('mouseleave', () => { isDown = false; });
+    track.addEventListener('mouseup', () => { isDown = false; });
+    track.addEventListener('mousemove', (e) => {
+      if (!isDown) return;
+      e.preventDefault();
+      const x = e.pageX - track.offsetLeft;
+      track.scrollLeft = scrollLeft - (x - startX) * 1.5;
+    });
+
+    // Mouse wheel horizontal scroll
+    track.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      track.scrollLeft += e.deltaY * 2;
+    }, { passive: false });
+  }
+
+  // Lightbox
+  document.querySelectorAll('.gallery-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const src = card.getAttribute('data-src') || '';
+      const caption = card.getAttribute('data-caption') || '';
+      if (lbImg) lbImg.src = src;
+      if (lbCaption) lbCaption.textContent = caption;
+      lightbox?.classList.add('active');
+    });
+  });
+
+  lbClose?.addEventListener('click', () => lightbox?.classList.remove('active'));
+  lightbox?.addEventListener('click', (e) => {
+    if (e.target === lightbox) lightbox.classList.remove('active');
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') lightbox?.classList.remove('active');
+  });
+</script>

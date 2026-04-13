@@ -1,17 +1,55 @@
 ---
-
+import Layout from '../layouts/Layout.astro';
+import LoadingScreen from '../components/LoadingScreen.astro';
+import Nav from '../components/Nav.astro';
+import ScrollProgress from '../components/ScrollProgress.astro';
+import CustomCursor from '../components/CustomCursor.astro';
+import Hero from '../components/Hero.astro';
+import LucasProject from '../components/LucasProject.astro';
+import Gallery from '../components/Gallery.astro';
+import Building from '../components/Building.astro';
+import About from '../components/About.astro';
+import Wins from '../components/Wins.astro';
+import Ventures from '../components/Ventures.astro';
+import Limitless from '../components/Limitless.astro';
+import Social from '../components/Social.astro';
+import Contact from '../components/Contact.astro';
+import Footer from '../components/Footer.astro';
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<Layout>
+  <LoadingScreen />
+  <ScrollProgress />
+  <Nav />
+  <CustomCursor />
+
+  <main>
+    <Hero />
+    <LucasProject />
+    <Gallery />
+    <Building />
+    <About />
+    <Wins />
+    <Ventures />
+    <Limitless />
+    <Social />
+    <Contact />
+  </main>
+
+  <Footer />
+</Layout>
+
+<script>
+  import { initParticleCanvas } from '../scripts/particles';
+  import { initAnimations } from '../scripts/animations';
+
+  document.addEventListener('DOMContentLoaded', () => {
+    // Initialize all particle canvases
+    document.querySelectorAll('.particle-canvas').forEach((canvas) => {
+      initParticleCanvas(canvas as HTMLCanvasElement);
+    });
+
+    // Initialize GSAP animations
+    initAnimations();
+  });
+</script>
