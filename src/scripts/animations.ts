@@ -160,11 +160,10 @@ export function initAnimations() {
     });
   }
 
-  // Change 8: Text hover — green color change only (no inversion)
-  const isDark = () => document.documentElement.getAttribute('data-theme') === 'dark';
+  // Text hover — green color change (always dark mode)
   document.querySelectorAll('h1, h2, h3, p, span, .section-label, .card-body, .spiral-text, .closing-line, .hero-tagline').forEach((el) => {
     el.addEventListener('mouseenter', () => {
-      (el as HTMLElement).style.color = isDark() ? '#8cd867' : '#1a4d0a';
+      (el as HTMLElement).style.color = '#8cd867';
       (el as HTMLElement).style.transition = 'color 200ms ease';
     });
     el.addEventListener('mouseleave', () => {

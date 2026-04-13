@@ -2,22 +2,8 @@
    LUCAS WEEDEN — GLOBAL STYLES v2
    ============================================ */
 
-/* --- CSS Custom Properties --- */
+/* --- CSS Custom Properties — Dark mode only (Change 10) --- */
 :root {
-  --bg: #f2f5ef;
-  --text: #0d0d0d;
-  --accent: #3a7a2a;
-  --accent-glow: #5aba32;
-  --surface: #e8e6df;
-  --surface-alpha: rgba(242, 245, 239, 0.85);
-  --border: rgba(13, 13, 13, 0.1);
-  --card-bg: rgba(235, 232, 224, 0.6);
-  --card-border: rgba(13, 13, 13, 0.08);
-  --shadow: rgba(0, 0, 0, 0.08);
-  --mode: light;
-}
-
-[data-theme="dark"] {
   --bg: #060d04;
   --text: #e8f5e0;
   --accent: #5aba32;
@@ -102,11 +88,20 @@ img { max-width: 100%; height: auto; display: block; }
   margin-bottom: 48px;
 }
 
-/* Change 10: LP coin background spin */
+/* LP coin background animations */
 @keyframes lpBgCoinSpin {
   0% { transform: rotateY(0deg); }
   100% { transform: rotateY(360deg); }
 }
+@keyframes lpCoinSpin {
+  from { transform: rotateY(0deg); }
+  to { transform: rotateY(360deg); }
+}
+@keyframes lpCoinFloat {
+  from { transform: translateY(0px); }
+  to { transform: translateY(-12px); }
+}
+.lp-coin-particle { z-index: 0; pointer-events: none; }
 
 /* --- Two Column Grid --- */
 .two-col {
@@ -551,7 +546,7 @@ img { max-width: 100%; height: auto; display: block; }
 
 /* --- Scroll Progress --- */
 .scroll-progress {
-  position: fixed; top: 0; left: 0; height: 2px; z-index: 100000;
+  position: fixed; top: 0; left: 0; height: 6px; z-index: 100000;
   background: linear-gradient(90deg, #3a7a2a, #3dd8c5, #8855cc, #d4a843, #e86050, #3a7a2a);
   width: 0%; transition: width 0.05s linear;
 }

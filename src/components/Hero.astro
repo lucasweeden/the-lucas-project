@@ -44,58 +44,67 @@ const tickerText = "THE LUCAS PROJECT · IT'S ABOUT THAT TIME · BUILDER · OPER
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-    // LP brand lighting
-    scene.add(new THREE.AmbientLight(0x1a4d0a, 0.4));
-    const pl1 = new THREE.PointLight(0x5aba32, 2.0, 20);
-    pl1.position.set(3, 3, 4);
-    scene.add(pl1);
-    const pl2 = new THREE.PointLight(0x8cd867, 1.0, 20);
-    pl2.position.set(-3, -2, 3);
-    scene.add(pl2);
+    // Change 1: Bright lighting — true colors
+    scene.add(new THREE.AmbientLight(0xffffff, 0.9));
+    const dirLight = new THREE.DirectionalLight(0x8cd867, 1.8);
+    dirLight.position.set(3, 4, 5);
+    scene.add(dirLight);
+    const ptLight = new THREE.PointLight(0x5aba32, 2.5, 25);
+    ptLight.position.set(-2, 2, 4);
+    scene.add(ptLight);
 
     const loader = new THREE.TextureLoader();
-    const logoTex = loader.load('/images/smallLucas_Project_Logo.png');
-    logoTex.colorSpace = THREE.SRGBColorSpace;
+    const lpTex = loader.load('/images/smallLucas_Project_Logo.png');
+    lpTex.colorSpace = THREE.SRGBColorSpace;
 
-    // Change 2: Large center coin — LP logo, infinite 360 flip
-    const mainGeo = new THREE.CylinderGeometry(2.0, 2.0, 0.18, 64);
-    const mainMats = [
-      new THREE.MeshStandardMaterial({ color: 0x3a7a2a, metalness: 0.4, roughness: 0.3 }),
-      new THREE.MeshStandardMaterial({ map: logoTex, metalness: 0.4, roughness: 0.3 }),
-      new THREE.MeshStandardMaterial({ map: logoTex, metalness: 0.4, roughness: 0.3 }),
-    ];
-    const coin = new THREE.Mesh(mainGeo, mainMats);
+    // LP coin face material (shared)
+    const faceMat = new THREE.MeshStandardMaterial({
+      map: lpTex, color: 0xffffff, emissive: 0x2a5a1a, emissiveIntensity: 0.25,
+      metalness: 0.35, roughness: 0.25, transparent: false
+    });
+    const rimMat = new THREE.MeshStandardMaterial({
+      color: 0x3a7a2a, emissive: 0x1a4d0a, emissiveIntensity: 0.4,
+      metalness: 0.4, roughness: 0.3
+    });
+
+    // Change 2: Main coin — large, bright
+    const mainGeo = new THREE.CylinderGeometry(1.2, 1.2, 0.12, 64);
+    const mainFace = faceMat.clone();
+    mainFace.emissiveIntensity = 0.4;
+    const coin = new THREE.Mesh(mainGeo, [rimMat.clone(), mainFace, mainFace.clone()]);
+
+    // Intro: start offscreen above, small
+    coin.position.y = 8;
+    coin.scale.set(0.1, 0.1, 0.1);
     scene.add(coin);
 
-    // Rim glow
-    const glowGeo = new THREE.CylinderGeometry(2.2, 2.2, 0.22, 64);
-    const glowMat = new THREE.MeshBasicMaterial({ color: 0x5aba32, transparent: true, opacity: 0.1, blending: THREE.AdditiveBlending });
-    const glow = new THREE.Mesh(glowGeo, glowMat);
-    scene.add(glow);
+    // Green halo rim glow
+    const haloGeo = new THREE.CylinderGeometry(1.28, 1.28, 0.13, 64);
+    const haloMat = new THREE.MeshBasicMaterial({ color: 0x5aba32, transparent: true, opacity: 0.35, side: THREE.BackSide });
+    const halo = new THREE.Mesh(haloGeo, haloMat);
+    scene.add(halo);
+    halo.position.y = 8;
+    halo.scale.set(0.1, 0.1, 0.1);
 
-    // Infinite 360 flip via GSAP
-    gsap.to(coin.rotation, { y: Math.PI * 2, duration: 2.5, ease: 'none', repeat: -1 });
-
-    // Background LP logo coins
+    // Background LP coins — all bright, no transparency
     interface BgCoin { mesh: THREE.Mesh; vx: number; vy: number; rotSpeed: number; baseX: number; baseY: number; }
     const bgCoins: BgCoin[] = [];
-    const bgGeo = new THREE.CylinderGeometry(1, 1, 0.1, 32);
+    const bgGeo = new THREE.CylinderGeometry(1, 1, 0.08, 32);
 
     for (let i = 0; i < 50; i++) {
-      const scale = 0.15 + Math.random() * 0.45;
-      const op = 0.3 + Math.random() * 0.5;
-      const bgMat = [
-        new THREE.MeshStandardMaterial({ color: 0x3a7a2a, metalness: 0.4, roughness: 0.3, transparent: true, opacity: op }),
-        new THREE.MeshStandardMaterial({ map: logoTex, metalness: 0.4, roughness: 0.3, transparent: true, opacity: op }),
-        new THREE.MeshStandardMaterial({ map: logoTex, metalness: 0.4, roughness: 0.3, transparent: true, opacity: op }),
-      ];
-      const m = new THREE.Mesh(bgGeo, bgMat);
-      m.scale.set(scale, scale, scale);
+      const s = 0.15 + Math.random() * 0.45;
+      const bfm = faceMat.clone();
+      const m = new THREE.Mesh(bgGeo, [rimMat.clone(), bfm, bfm.clone()]);
+      m.scale.set(s, s, s);
       const x = (Math.random() - 0.5) * 16;
       const y = (Math.random() - 0.5) * 16;
       m.position.set(x, y, -5 - Math.random() * 10);
       m.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, 0);
       scene.add(m);
+      // Point light near each bg coin
+      const cl = new THREE.PointLight(0x5aba32, 0.15, 3);
+      cl.position.set(x, y, m.position.z + 0.5);
+      scene.add(cl);
       bgCoins.push({ mesh: m, vx: 0, vy: 0, rotSpeed: (Math.random() - 0.5) * 0.02, baseX: x, baseY: y });
     }
 
@@ -110,16 +119,35 @@ const tickerText = "THE LUCAS PROJECT · IT'S ABOUT THAT TIME · BUILDER · OPER
     const heroEl = document.getElementById('hero');
     if (heroEl) obs.observe(heroEl);
 
+    // Intro animation: fly in from above, 720 flip, then continuous spin
+    let introComplete = false;
+    setTimeout(() => {
+      // Fly in
+      gsap.to(coin.position, { y: 0, duration: 0.8, ease: 'power3.out' });
+      gsap.to(coin.scale, { x: 1, y: 1, z: 1, duration: 0.8, ease: 'power3.out' });
+      gsap.to(halo.position, { y: 0, duration: 0.8, ease: 'power3.out' });
+      gsap.to(halo.scale, { x: 1, y: 1, z: 1, duration: 0.8, ease: 'power3.out' });
+      // 720 flip after landing
+      gsap.to(coin.rotation, { y: Math.PI * 4, duration: 1.0, ease: 'power2.inOut', delay: 0.8, onComplete: () => {
+        introComplete = true;
+        // Start continuous Y spin
+        gsap.to(coin.rotation, { y: '+=6.283', duration: 2.0, ease: 'none', repeat: -1 });
+      }});
+    }, 2600);
+
     let time = 0;
     function animate() {
       requestAnimationFrame(animate);
       if (!isVisible) return;
       time += 0.016;
 
-      // Wobble tilt + mouse tilt overlay (GSAP handles Y rotation)
-      coin.rotation.x = Math.sin(time * 0.8) * 0.3 + mouseNY * 0.35;
-      coin.rotation.z = mouseNX * 0.35;
-      glow.rotation.copy(coin.rotation);
+      if (introComplete) {
+        // Multi-axis oscillation
+        coin.rotation.x = Math.sin(time * 0.8) * 0.6 + mouseNY * 0.5;
+        coin.rotation.z = Math.cos(time * 0.5) * 0.4 + mouseNX * 0.5;
+      }
+      halo.rotation.copy(coin.rotation);
+      halo.position.copy(coin.position);
 
       bgCoins.forEach((bc) => {
         bc.mesh.rotation.y += bc.rotSpeed;
@@ -149,7 +177,7 @@ const tickerText = "THE LUCAS PROJECT · IT'S ABOUT THAT TIME · BUILDER · OPER
     });
   }
 
-  // Persistent coin scroll behavior
+  // Persistent coin scroll
   const persistCoin = document.getElementById('persistent-coin');
   let coinFlicked = false;
   let lastSectionIdx = -1;

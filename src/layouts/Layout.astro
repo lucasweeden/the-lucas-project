@@ -5,7 +5,7 @@ interface Props {
 const { title = "Lucas Weeden — Builder · Operator · Creator" } = Astro.props;
 ---
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -22,15 +22,8 @@ const { title = "Lucas Weeden — Builder · Operator · Creator" } = Astro.prop
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <script is:inline>
-    (function() {
-      var saved = localStorage.getItem('lw-theme');
-      if (saved) {
-        document.documentElement.setAttribute('data-theme', saved);
-      } else {
-        var h = new Date().getHours();
-        document.documentElement.setAttribute('data-theme', (h >= 6 && h < 19) ? 'light' : 'dark');
-      }
-    })();
+    // Change 10: Force dark mode always
+    document.documentElement.setAttribute('data-theme', 'dark');
   </script>
 </head>
 <body>
