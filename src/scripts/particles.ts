@@ -110,7 +110,7 @@ export function initStardust() {
   const particleCount = isMobile ? 150 : 1000;
 
   const canvas = document.createElement('canvas');
-  canvas.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:2;pointer-events:none;will-change:contents;contain:strict;';
+  canvas.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:1;pointer-events:none;will-change:contents;';
   document.body.appendChild(canvas);
   const ctx = canvas.getContext('2d');
   if (!ctx) return;
@@ -164,10 +164,7 @@ export function initStardust() {
     frameCount++;
     if (frameCount % 2 !== 0) return;
 
-    // Perf D: Trail-fade instead of full clear
-    ctx.globalCompositeOperation = 'source-over';
-    ctx.fillStyle = 'rgba(6, 13, 4, 0.18)';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     const now = Date.now();
 
