@@ -24,17 +24,24 @@ const photos = [
 const count = photos.length;
 const radius = 900;
 const GAME_DAY_IDX = 13;
-// Game Day needs ~4.5 deg extra arc for its wider card (400px vs 260px)
-// Distribute that extra space: Game Day gets BASE + 4.5, other 19 cards each lose 4.5/19 ≈ 0.237 deg
-const GD_EXTRA = 4.5;
-const NORMAL_ANGLE = (360 - (360 / count + GD_EXTRA)) / (count - 1); // ~17.76 deg for normal cards
-const GD_ANGLE = 360 / count + GD_EXTRA; // ~22.5 deg for Game Day
+const CAMP_LIFE_IDX = 12; // card immediately left of Game Day
+// Game Day needs ~4.5 deg extra arc total — split equally: 2.25 on left, 2.25 on right
+// 20 gaps total: 18 normal + 2 special (before & after Game Day)
+// 18*N + 2*(N+2.25) = 360 → 20N + 4.5 = 360 → N = 17.775
+const NORMAL_ANGLE = 17.775;
+const GD_ADJ_ANGLE = 20.025; // gap on each side of Game Day (17.775 + 2.25)
 
-// Precompute cumulative angles for perfectly even visual spacing
+// Precompute cumulative angles — equal visual spacing on both sides of Game Day
 function getCardAngle(idx: number): number {
   let angle = 0;
   for (let i = 0; i < idx; i++) {
-    angle += (i === GAME_DAY_IDX) ? GD_ANGLE : NORMAL_ANGLE;
+    // i=12 (Camp Life): gap TO Game Day needs extra space on Game Day's left
+    // i=13 (Game Day): gap TO Great Grandpa needs extra space on Game Day's right
+    if (i === CAMP_LIFE_IDX || i === GAME_DAY_IDX) {
+      angle += GD_ADJ_ANGLE;
+    } else {
+      angle += NORMAL_ANGLE;
+    }
   }
   return angle;
 }
@@ -154,9 +161,9 @@ function getCardAngle(idx: number): number {
   const total = cards.length;
   const R = 900;
   const GD_I = 13;
-  const GD_EXTRA_JS = 4.5;
-  const NORMAL_A = (360 - (360 / total + GD_EXTRA_JS)) / (total - 1);
-  const GD_A = 360 / total + GD_EXTRA_JS;
+  const CL_I = 12; // Camp Life — left neighbor of Game Day
+  const NORMAL_A = 17.775;
+  const GD_ADJ_A = 20.025; // equal extra gap on both sides of Game Day
 
   if (container && sceneEl) {
     let rotation = 0, velocity = 0, isDragging = false, lastX = 0;
@@ -164,7 +171,7 @@ function getCardAngle(idx: number): number {
     function getAngle(i: number): number {
       let angle = 0;
       for (let j = 0; j < i; j++) {
-        angle += (j === GD_I) ? GD_A : NORMAL_A;
+        angle += (j === CL_I || j === GD_I) ? GD_ADJ_A : NORMAL_A;
       }
       return angle;
     }
