@@ -121,7 +121,7 @@ const timeline = [
       scene.background = new THREE.Color(0x030a02);
       scene.fog = new THREE.FogExp2(0x030a02, 0.045);
 
-      const camera = new THREE.PerspectiveCamera(72, window.innerWidth / window.innerHeight, 0.1, 80);
+      const camera = new THREE.PerspectiveCamera(87, window.innerWidth / window.innerHeight, 0.1, 80);
       camera.position.set(0, 6, 0);
 
       const renderer = new THREE.WebGLRenderer({ canvas: stairCanvas, antialias: true });
@@ -164,25 +164,25 @@ const timeline = [
 
       for (let i = 0; i <= STEP_COUNT * 20; i++) {
         const t = i / (STEP_COUNT * 20);
-        const angle = -t * STEP_COUNT * (STEP_ANGLE * Math.PI / 180);
+        const angle = t * STEP_COUNT * (STEP_ANGLE * Math.PI / 180);
         const y = 5.5 - t * (STEP_COUNT * STEP_HEIGHT + 2.5);
-        const wr = SPIRAL_RADIUS * 0.42;
+        const wr = SPIRAL_RADIUS * 0.567;
         cameraPathPoints.push(new THREE.Vector3(Math.cos(angle) * wr, y, Math.sin(angle) * wr));
       }
       const cameraPath = new THREE.CatmullRomCurve3(cameraPathPoints);
 
       // Build physical steps
       for (let i = 0; i < STEP_COUNT; i++) {
-        const angle = i * (STEP_ANGLE * Math.PI / 180);
+        const angle = -i * (STEP_ANGLE * Math.PI / 180);
         const y = -i * STEP_HEIGHT;
         const sx = Math.cos(angle) * SPIRAL_RADIUS * 0.5;
         const sz = Math.sin(angle) * SPIRAL_RADIUS * 0.5;
 
         // Tread (top face gets photo texture later)
         const treadGeo = new THREE.BoxGeometry(TREAD_WIDTH, TREAD_THICKNESS, TREAD_DEPTH);
-        const tread = new THREE.Mesh(treadGeo, riserMat); // placeholder, replaced async
+        const tread = new THREE.Mesh(treadGeo, riserMat);
         tread.position.set(sx, y, sz);
-        tread.rotation.y = -angle;
+        tread.rotation.y = angle;
         tread.receiveShadow = true;
         scene.add(tread);
 
@@ -194,7 +194,7 @@ const timeline = [
           y - STEP_HEIGHT * 0.33,
           Math.sin(angle) * SPIRAL_RADIUS * 0.5
         );
-        riser.rotation.y = -angle;
+        riser.rotation.y = angle;
         scene.add(riser);
 
         // Step light
@@ -285,7 +285,7 @@ const timeline = [
       const railPts: THREE.Vector3[] = [];
       for (let i = 0; i <= STEP_COUNT * 12; i++) {
         const t = i / (STEP_COUNT * 12);
-        const a = t * STEP_COUNT * (STEP_ANGLE * Math.PI / 180);
+        const a = -t * STEP_COUNT * (STEP_ANGLE * Math.PI / 180);
         const y = -t * STEP_COUNT * STEP_HEIGHT + 1.0;
         railPts.push(new THREE.Vector3(Math.cos(a) * (SPIRAL_RADIUS + 0.2), y, Math.sin(a) * (SPIRAL_RADIUS + 0.2)));
       }
@@ -295,7 +295,7 @@ const timeline = [
 
       // Balusters
       for (let i = 0; i < STEP_COUNT; i++) {
-        const a = i * (STEP_ANGLE * Math.PI / 180);
+        const a = -i * (STEP_ANGLE * Math.PI / 180);
         const b = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 1.0, 8), railMat);
         b.position.set(Math.cos(a) * (SPIRAL_RADIUS + 0.1), -i * STEP_HEIGHT + 0.5, Math.sin(a) * (SPIRAL_RADIUS + 0.1));
         scene.add(b);
