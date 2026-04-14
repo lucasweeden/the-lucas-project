@@ -56,7 +56,7 @@ const timeline = [
   <div class="mobile-timeline" id="mobile-timeline">
     {timeline.map((entry) => (
       <div class="mobile-step">
-        <img src={`/images/${entry.photo}`} alt={entry.title} loading="lazy" onerror="this.style.display='none'" />
+        <img src={`/images/${entry.photo}`} alt={entry.title} loading="eager" decoding="async" onerror="this.style.display='none'" />
         <h4>{entry.title}</h4>
         <p>{entry.text}</p>
       </div>

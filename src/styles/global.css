@@ -854,7 +854,7 @@ img:not([src]) { display: none; }
 /* --- Device-specific responsive overrides (Change 1) --- */
 
 /* Mobile */
-[data-device="mobile"] .site-section { padding: 40px 0; }
+[data-device="mobile"] .site-section { padding: 60px 0; }
 [data-device="mobile"] .section-inner { padding: 0 20px; }
 [data-device="mobile"] .section-title { font-size: clamp(28px, 8vw, 48px); }
 [data-device="mobile"] .hero-title-line { font-size: clamp(36px, 12vw, 52px); }
