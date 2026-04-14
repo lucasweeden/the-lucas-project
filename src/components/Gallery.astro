@@ -25,12 +25,12 @@ const count = photos.length;
 const radius = 960;
 ---
 <section class="site-section" id="gallery">
-  <div class="section-inner" style="margin-bottom: 80px;">
+  <div class="section-inner" style="display:block;position:relative;z-index:10;margin-bottom:72px;padding-bottom:0;">
     <div class="section-label">02 — The Life</div>
     <h2 class="section-title">LIVING WIDE OPEN</h2>
     <p class="section-subtitle">No filter. No highlight reel. Just the climb.</p>
   </div>
-  <div class="carousel-scene" id="carousel-scene" style="margin-top: 40px;">
+  <div class="carousel-scene" id="carousel-scene" style="margin-top:72px;position:relative;z-index:5;">
     <div class="carousel-container" id="photoCarousel">
       {photos.map((photo, i) => {
         const angle = (360 / count) * i;
@@ -81,6 +81,7 @@ const radius = 960;
   .game-day-card {
     width: 400px !important;
     height: 260px !important;
+    transform-origin: center center;
   }
   .game-day-card img {
     object-fit: cover;
@@ -116,9 +117,13 @@ const radius = 960;
   if (container && scene) {
     let rotation = 0, velocity = 0, isDragging = false, lastX = 0;
 
+    const GAME_DAY_IDX = 13; // Game Day card index
     function updateCardDepth() {
       cards.forEach((card, i) => {
-        const cardAngle = (360 / total) * i;
+        let cardAngle = (360 / total) * i;
+        // Add angular spacing around wider Game Day card
+        if (i === GAME_DAY_IDX - 1) cardAngle -= 4;
+        if (i === GAME_DAY_IDX + 1) cardAngle += 4;
         let diff = ((cardAngle + rotation) % 360 + 360) % 360;
         if (diff > 180) diff = 360 - diff;
         const t = diff / 180;

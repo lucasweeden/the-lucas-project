@@ -92,7 +92,7 @@ const timeline = [
       const STEPS = 8;
       const STEP_DROP = 2.2;
       const STEP_TURN = -42; // negative = left turn
-      const WALK_RADIUS = 1.8;
+      const WALK_RADIUS = 3.96;
       const STEP_RADIUS = 2.8;
       const STEP_W = 3.4;
       const STEP_D = 1.8;
@@ -114,7 +114,7 @@ const timeline = [
       scene.background = new THREE.Color(0x030a02);
       scene.fog = new THREE.FogExp2(0x030a02, 0.038);
 
-      const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 60);
+      const camera = new THREE.PerspectiveCamera(95, window.innerWidth / window.innerHeight, 0.1, 80);
       camera.position.set(WALK_RADIUS, STEPS * STEP_DROP * 0.08, 0);
 
       const renderer = new THREE.WebGLRenderer({ canvas: stairCanvas, antialias: true });
@@ -208,12 +208,20 @@ const timeline = [
             ctx.fillStyle = fade; ctx.fillRect(16,300,992,72);
             ctx.restore();
             ctx.fillStyle = '#2a6a15'; ctx.fillRect(16,375,992,1.5);
-            ctx.fillStyle = '#8cd867'; ctx.font = 'bold 54px Arial'; ctx.textAlign = 'center';
-            ctx.fillText(data.title.toUpperCase(), 512, 440);
-            ctx.fillStyle = 'rgba(90,186,50,0.35)'; ctx.fillRect(312,450,400,1);
+            // Title with black backdrop
+            const titleText = data.title.toUpperCase();
+            ctx.font = 'bold 54px Arial'; ctx.textAlign = 'center';
+            const titleW = ctx.measureText(titleText).width;
+            ctx.fillStyle = 'rgba(0,0,0,0.85)';
+            ctx.beginPath();
+            ctx.rect(512 - titleW/2 - 20, 408, titleW + 40, 64);
+            ctx.fill();
+            ctx.fillStyle = '#8cd867';
+            ctx.fillText(titleText, 512, 456);
+            ctx.fillStyle = 'rgba(90,186,50,0.35)'; ctx.fillRect(312,472,400,1);
             ctx.fillStyle = '#a8d890'; ctx.font = '21px Arial'; ctx.textAlign = 'center';
             const words = data.body.split(' ');
-            let line = '', y = 482, lh = 30, mw = 960;
+            let line = '', y = 500, lh = 28, mw = 960;
             for (const w of words) {
               const t = line + w + ' ';
               if (ctx.measureText(t).width > mw && line) { ctx.fillText(line.trim(),512,y); line=w+' '; y+=lh; if(y>628)break; } else line=t;
@@ -245,7 +253,7 @@ const timeline = [
 
           const tex = await makeStepTex(stepData[i], i);
           tex.colorSpace = THREE.SRGBColorSpace;
-          const topMat = new THREE.MeshStandardMaterial({ map: tex, roughness: 0.55, metalness: 0.08 });
+          const topMat = new THREE.MeshStandardMaterial({ map: tex, color: 0xffffff, roughness: 0.55, metalness: 0.08 });
 
           const treadGeo = new THREE.BoxGeometry(STEP_W, STEP_H, STEP_D);
           const tread = new THREE.Mesh(treadGeo, [sideMat, sideMat, topMat, riserMat2, sideMat, sideMat]);
@@ -332,7 +340,7 @@ const timeline = [
           // Look ahead and DOWN at steps
           const lookT = Math.min(t + 0.03, 1.0);
           const lookPos = cameraPath.getPoint(lookT);
-          lookPos.y -= 1.1;
+          lookPos.y -= 0.6;
           camera.lookAt(lookPos);
 
           // Walking sway
