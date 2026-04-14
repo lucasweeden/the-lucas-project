@@ -1,4 +1,14 @@
 ---
+const socials = [
+  { platform: "YouTube", handle: "@the.lucas.project", url: "https://youtube.com/@the.lucas.project.1" },
+  { platform: "Instagram", handle: "@the.lucas.project", url: "https://www.instagram.com/the.lucas.project" },
+  { platform: "TikTok", handle: "@lucas.project", url: "https://www.tiktok.com/@lucas.project" },
+  { platform: "LinkedIn", handle: "Lucas Weeden", url: "https://www.linkedin.com/in/lucas-weeden-6721133bb" },
+  { platform: "Facebook", handle: "The Lucas Project", url: "https://www.facebook.com/share/18Th9LsXYL/" },
+  { platform: "Threads", handle: "@the.lucas.project", url: "https://www.threads.com/@the.lucas.project" },
+  { platform: "Snapchat", handle: "lucas.weeden", url: "https://snapchat.com/t/66goy6LY" },
+  { platform: "Instagram", handle: "@lucas.weeden", url: "https://www.instagram.com/lucas.weeden" },
+];
 ---
 <footer class="site-footer">
   <span>&copy; 2025 Lucas Weeden &middot; The Lucas Project</span>
@@ -6,8 +16,112 @@
   <button class="footer-top" id="back-to-top">Back to top &uarr;</button>
 </footer>
 
+<!-- Social links bar -->
+<div style="padding: 40px 20px 32px; text-align: center; position: relative; z-index: 2;">
+  <div style="font-family:'Syne',sans-serif;font-size:11px;letter-spacing:3px;color:#5aba32;text-transform:uppercase;margin-bottom:16px;">FOLLOW THE JOURNEY</div>
+  <div class="footer-social-grid">
+    {socials.map((s) => (
+      <a href={s.url} target="_blank" rel="noopener noreferrer" class="footer-social-pill">
+        <img src="/images/smallLucas_Project_Logo.png" alt="" style="width:16px;height:16px;border-radius:50;" />
+        <span style="font-weight:600;">{s.platform}</span>
+        <span style="opacity:0.7;">{s.handle}</span>
+      </a>
+    ))}
+  </div>
+</div>
+
+<!-- Scroll-to-resources trap -->
+<div id="footer-scroll-trap" style="height:280vh;position:relative;z-index:2;">
+  <div id="footer-trap-hint" style="position:sticky;top:50%;text-align:center;font-family:'Bebas Neue',sans-serif;font-size:18px;color:#5aba32;opacity:0;transition:opacity 0.5s ease;letter-spacing:2px;">Resources →</div>
+</div>
+<div id="footer-scroll-trap-end" style="height:1px;"></div>
+
+<style>
+  .footer-social-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  .footer-social-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(26,77,10,0.5);
+    border: 1px solid #3a7a2a;
+    border-radius: 24px;
+    padding: 10px 20px;
+    color: #8cd867;
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    text-decoration: none;
+    transition: background 200ms ease, border-color 200ms ease, transform 200ms ease;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  .footer-social-pill:hover {
+    background: rgba(90,186,50,0.2);
+    border-color: #5aba32;
+    transform: translateY(-2px);
+    color: #8cd867;
+  }
+  @media (max-width: 768px) {
+    .footer-social-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 480px) {
+    .footer-social-grid { grid-template-columns: 1fr; }
+    .footer-social-pill { font-size: 12px; padding: 8px 14px; }
+  }
+</style>
+
 <script>
   document.getElementById('back-to-top')?.addEventListener('click', () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  // Scroll-to-resources trap
+  const sentinel = document.getElementById('footer-scroll-trap-end');
+  const trap = document.getElementById('footer-scroll-trap');
+  const hint = document.getElementById('footer-trap-hint');
+  let scrollCount = 0;
+  let sentinelVisible = false;
+
+  if (sentinel) {
+    const obs = new IntersectionObserver((entries) => {
+      sentinelVisible = entries[0].isIntersecting;
+      if (!sentinelVisible) scrollCount = 0;
+    }, { threshold: 0.1 });
+    obs.observe(sentinel);
+  }
+
+  // Hint opacity based on scroll into trap zone
+  if (trap && hint) {
+    window.addEventListener('scroll', () => {
+      const rect = trap.getBoundingClientRect();
+      if (rect.top < window.innerHeight) {
+        const progress = Math.min(1, (window.innerHeight - rect.top) / (rect.height * 0.3));
+        hint.style.opacity = String(Math.min(progress, 0.8));
+      } else {
+        hint.style.opacity = '0';
+      }
+    });
+  }
+
+  window.addEventListener('wheel', (e) => {
+    if (sentinelVisible && e.deltaY > 0) {
+      scrollCount++;
+      if (scrollCount >= 3) window.location.href = '/resources';
+    }
+  });
+
+  let touchStartY = 0;
+  window.addEventListener('touchstart', (e) => { touchStartY = e.touches[0].clientY; });
+  window.addEventListener('touchend', (e) => {
+    const delta = touchStartY - e.changedTouches[0].clientY;
+    if (sentinelVisible && delta > 30) {
+      scrollCount++;
+      if (scrollCount >= 3) window.location.href = '/resources';
+    }
   });
 </script>

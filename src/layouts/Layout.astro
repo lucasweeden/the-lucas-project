@@ -26,9 +26,18 @@ const { title = "Lucas Weeden — Builder · Operator · Creator" } = Astro.prop
   </script>
 </head>
 <body>
+  <!-- Splash Screen -->
+  <div id="lp-splash" style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:#050f02;z-index:999999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;cursor:none;transition:opacity 600ms ease;">
+    <div id="splash-coin-wrapper" style="width:180px;height:180px;border-radius:50%;cursor:none;transition:transform 200ms ease,box-shadow 200ms ease;">
+      <img id="splash-coin" src="/images/smallLucas_Project_Logo.png" alt="The Lucas Project" style="width:100%;height:100%;border-radius:50%;display:block;" />
+    </div>
+    <p id="splash-prompt" style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:#8cd867;letter-spacing:6px;margin:0;">CLICK TO ENTER</p>
+    <p style="font-family:'Syne',sans-serif;font-size:12px;color:rgba(140,216,103,0.5);letter-spacing:4px;text-transform:uppercase;margin:0;">The Lucas Project</p>
+  </div>
+
   <slot />
 
-  <!-- Music Player Widget — top-right corner, all pages -->
+  <!-- Music Player Widget -->
   <div id="lp-music-player" style="position:fixed;top:16px;right:16px;z-index:10001;width:220px;height:64px;background:rgba(6,13,4,0.88);border:1px solid #3a7a2a;border-radius:32px;backdrop-filter:blur(12px);padding:10px 16px;display:flex;align-items:center;gap:8px;font-family:'Syne',sans-serif;">
     <button id="mp-prev" class="mp-btn" aria-label="Previous">⏮</button>
     <button id="mp-play" class="mp-btn" aria-label="Play">▶</button>
@@ -47,15 +56,14 @@ const { title = "Lucas Weeden — Builder · Operator · Creator" } = Astro.prop
       cursor:none;transition:background 150ms ease;flex-shrink:0;padding:0;
     }
     .mp-btn:hover { background:rgba(90,186,50,0.3); }
-    #mp-track { position:relative; }
-    #mp-track-text.scrolling {
-      display:inline-block;
-      animation:mpMarquee 8s linear infinite;
-    }
-    @keyframes mpMarquee {
-      0% { transform:translateX(0); }
-      100% { transform:translateX(-100%); }
-    }
+    #mp-track-text.scrolling { display:inline-block; animation:mpMarquee 8s linear infinite; }
+    @keyframes mpMarquee { 0%{transform:translateX(0)} 100%{transform:translateX(-100%)} }
+    @keyframes splashCoinSpin { 0%{transform:rotateY(0deg)} 100%{transform:rotateY(360deg)} }
+    @keyframes splashPulse { from{box-shadow:0 0 40px #5aba32,0 0 80px rgba(90,186,50,0.2)} to{box-shadow:0 0 80px #8cd867,0 0 140px rgba(90,186,50,0.45)} }
+    @keyframes splashBlink { from{opacity:0.5} to{opacity:1} }
+    #splash-coin-wrapper { animation:splashCoinSpin 3s linear infinite, splashPulse 2s ease-in-out infinite alternate; }
+    #splash-coin-wrapper:hover { transform:scale(1.08); box-shadow:0 0 80px #8cd867,0 0 160px rgba(90,186,50,0.5); }
+    #splash-prompt { animation:splashBlink 1.5s ease-in-out infinite alternate; }
   </style>
 
   <script is:inline>
@@ -84,6 +92,7 @@ const { title = "Lucas Weeden — Builder · Operator · Creator" } = Astro.prop
       var muteBtn = document.getElementById('mp-mute');
       var trackText = document.getElementById('mp-track-text');
       var trackWrap = document.getElementById('mp-track');
+      var splash = document.getElementById('lp-splash');
 
       function formatName(path) {
         var name = path.split('/').pop().replace(/\.[^.]+$/, '');
@@ -137,6 +146,40 @@ const { title = "Lucas Weeden — Builder · Operator · Creator" } = Astro.prop
         }, 100);
       }
 
+      function hideSplash() {
+        if (!splash) return;
+        splash.style.opacity = '0';
+        setTimeout(function() {
+          splash.style.display = 'none';
+          try { splash.remove(); } catch(e) {}
+        }, 650);
+      }
+
+      function showSplash() {
+        if (splash) splash.style.display = 'flex';
+      }
+
+      function onMusicStarted() {
+        sessionStorage.setItem('lp_music_started', 'true');
+      }
+
+      function startMusicAndHideSplash() {
+        if (musicStarted) return;
+        musicStarted = true;
+        var saved = sessionStorage.getItem('lp_music_track');
+        var savedTime = sessionStorage.getItem('lp_music_time');
+        if (saved !== null && parseInt(saved) > 0) {
+          loadTrack(parseInt(saved));
+          if (savedTime) audio.currentTime = parseFloat(savedTime);
+        } else {
+          loadTrack(0);
+        }
+        playTrack();
+        fadeIn();
+        hideSplash();
+        onMusicStarted();
+      }
+
       audio.addEventListener('ended', function() {
         var next = currentTrack === 0 ? 1 : (currentTrack + 1);
         if (next >= playlist.length) next = 1;
@@ -144,36 +187,65 @@ const { title = "Lucas Weeden — Builder · Operator · Creator" } = Astro.prop
         playTrack();
       });
 
-      function startMusic() {
-        if (!musicStarted) {
-          musicStarted = true;
-          var saved = sessionStorage.getItem('lp_music_track');
-          var savedTime = sessionStorage.getItem('lp_music_time');
-          if (saved !== null && parseInt(saved) > 0) {
-            loadTrack(parseInt(saved));
-            if (savedTime) audio.currentTime = parseFloat(savedTime);
-          } else {
-            loadTrack(0);
-          }
-          playTrack();
+      // Check if already interacted this session
+      if (sessionStorage.getItem('lp_music_started') === 'true') {
+        // Skip splash, resume music
+        hideSplash();
+        var saved = sessionStorage.getItem('lp_music_track');
+        var savedTime = sessionStorage.getItem('lp_music_time');
+        if (saved !== null) loadTrack(parseInt(saved));
+        else loadTrack(0);
+        if (savedTime) audio.currentTime = parseFloat(savedTime);
+        musicStarted = true;
+        // Try autoplay (may work since user interacted before)
+        audio.play().then(function() {
+          isPlaying = true;
+          updatePlayButton();
           fadeIn();
+        }).catch(function() {
+          // Need interaction again — listen for click
+          document.addEventListener('click', function() {
+            if (!isPlaying) { playTrack(); fadeIn(); }
+          }, { once: true });
+        });
+      } else {
+        // Fresh visit — try autoplay
+        loadTrack(0);
+        var attempt = audio.play();
+        if (attempt !== undefined) {
+          attempt.then(function() {
+            // Autoplay succeeded
+            musicStarted = true;
+            isPlaying = true;
+            updatePlayButton();
+            fadeIn();
+            hideSplash();
+            onMusicStarted();
+          }).catch(function() {
+            // Autoplay blocked — show splash
+            audio.pause();
+            showSplash();
+          });
         }
       }
 
-      document.addEventListener('click', startMusic, { once: true });
-      document.addEventListener('scroll', startMusic, { once: true });
-      document.addEventListener('keydown', startMusic, { once: true });
-      document.addEventListener('touchstart', startMusic, { once: true });
+      // Splash click handler
+      if (splash) {
+        splash.addEventListener('click', function() {
+          startMusicAndHideSplash();
+        });
+      }
 
+      // Player controls
       if (playBtn) playBtn.addEventListener('click', function(e) {
         e.stopPropagation();
-        if (!musicStarted) { startMusic(); return; }
+        if (!musicStarted) { startMusicAndHideSplash(); return; }
         if (isPlaying) { pauseTrack(); } else { playTrack(); }
       });
 
       if (nextBtn) nextBtn.addEventListener('click', function(e) {
         e.stopPropagation();
-        if (!musicStarted) startMusic();
+        if (!musicStarted) startMusicAndHideSplash();
         var next = (currentTrack + 1) % playlist.length;
         loadTrack(next);
         playTrack();
@@ -181,7 +253,7 @@ const { title = "Lucas Weeden — Builder · Operator · Creator" } = Astro.prop
 
       if (prevBtn) prevBtn.addEventListener('click', function(e) {
         e.stopPropagation();
-        if (!musicStarted) startMusic();
+        if (!musicStarted) startMusicAndHideSplash();
         var prev = (currentTrack - 1 + playlist.length) % playlist.length;
         loadTrack(prev);
         playTrack();
