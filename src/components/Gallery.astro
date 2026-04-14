@@ -54,7 +54,18 @@ function getCardAngle(idx: number): number {
     <p class="section-subtitle">No filter. No highlight reel. Just the climb.</p>
   </div>
 
-  <!-- Carousel with clear vertical gap from heading -->
+  <!-- MOBILE: Flat horizontal scroll (no 3D transforms that break image loading) -->
+  <div class="mobile-carousel" id="mobile-carousel">
+    {photos.map((photo, i) => (
+      <div class={`mobile-carousel-card ${photo.isGameDay ? 'mobile-gd-card' : ''}`}
+        data-src={`/images/${photo.src}`} data-caption={photo.caption}>
+        <img src={`/images/${photo.src}`} alt={photo.caption} loading="eager" decoding="async" />
+        <div class="card-title">{photo.caption}</div>
+      </div>
+    ))}
+  </div>
+
+  <!-- DESKTOP: 3D rotating carousel -->
   <div class="carousel-scene" id="carousel-scene">
     <div class="carousel-container" id="photoCarousel">
       {photos.map((photo, i) => {
@@ -89,6 +100,51 @@ function getCardAngle(idx: number): number {
     text-align: center;
   }
 
+  /* === MOBILE CAROUSEL — flat horizontal scroll === */
+  .mobile-carousel {
+    display: none; /* hidden on desktop */
+  }
+  @media (max-width: 768px) {
+    .mobile-carousel {
+      display: flex;
+      gap: 16px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      -webkit-overflow-scrolling: touch;
+      scroll-snap-type: x mandatory;
+      padding: 20px 16px;
+      margin-top: 0;
+    }
+    .mobile-carousel::-webkit-scrollbar { display: none; }
+    .mobile-carousel { -ms-overflow-style: none; scrollbar-width: none; }
+    .mobile-carousel-card {
+      flex-shrink: 0;
+      width: 240px;
+      height: 340px;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 2px solid rgba(90,186,50,0.4);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+      scroll-snap-align: center;
+      background: rgba(6,13,4,0.9);
+    }
+    .mobile-carousel-card img {
+      width: 100%;
+      height: 80%;
+      object-fit: cover;
+      object-position: center center;
+      display: block;
+    }
+    .mobile-gd-card {
+      width: 320px;
+      height: 240px;
+    }
+    /* Hide 3D carousel on mobile */
+    .carousel-scene { display: none !important; }
+    .gallery-heading { padding: 0 20px; padding-bottom: 20px; }
+  }
+
+  /* === DESKTOP CAROUSEL — 3D rotating === */
   .carousel-scene {
     width: 100%;
     height: 580px;
@@ -116,7 +172,6 @@ function getCardAngle(idx: number): number {
     box-shadow: 0 8px 32px rgba(0,0,0,0.6);
     transition: opacity 0.15s ease, filter 0.15s ease;
     will-change: transform, opacity;
-    /* center the card on the transform origin */
     left: 50%; top: 50%;
     margin-left: -130px; margin-top: -200px;
   }
@@ -141,56 +196,25 @@ function getCardAngle(idx: number): number {
     font-family: 'Syne', sans-serif; font-size: 13px;
     letter-spacing: 1px; padding: 0 12px; text-align: center;
   }
-  @media (max-width: 768px) {
-    .gallery-heading { padding: 0 20px; padding-bottom: 40px; }
-    .carousel-scene { height: 400px; margin-top: 40px; }
-    .carousel-container { width: 180px; height: 280px; }
-    .carousel-card { width: 180px; height: 280px; margin-left: -90px; margin-top: -140px; }
-    .game-day-card { width: 300px !important; height: 200px !important; margin-left: -150px !important; margin-top: -100px !important; }
-  }
 </style>
 
 <script>
   const sceneEl = document.getElementById('carousel-scene');
   const container = document.getElementById('photoCarousel');
-  const cards = document.querySelectorAll('.carousel-card');
+  const desktopCards = document.querySelectorAll('.carousel-card');
+  const mobileCards = document.querySelectorAll('.mobile-carousel-card');
   const lightbox = document.getElementById('lightbox');
   const lbImg = document.getElementById('lightbox-img') as HTMLImageElement;
   const lbCaption = document.getElementById('lightbox-caption');
   const lbClose = document.getElementById('lightbox-close');
-  const total = cards.length;
   const R = 900;
   const GD_I = 13;
   const CL_I = 12;
   const NORMAL_A = 17.775;
   const GD_ADJ_A = 20.025;
 
-  const isMobileCarousel = window.innerWidth <= 768 || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-
-  // === FORCE LOAD ALL IMAGES ===
-  // On mobile, browsers skip loading images in 3D-transformed containers.
-  // Force every carousel image to load by creating hidden Image() objects,
-  // then swap src to trigger browser cache hit on the real <img>.
-  function forceLoadAllImages() {
-    cards.forEach((card) => {
-      const img = card.querySelector('img') as HTMLImageElement;
-      if (!img || img.complete) return;
-      const loader = new Image();
-      loader.src = img.src;
-      loader.onload = () => {
-        // Re-assign src to trigger render from cache
-        const src = img.src;
-        img.src = '';
-        img.src = src;
-      };
-    });
-  }
-  // Run immediately and also after a short delay (for slow connections)
-  forceLoadAllImages();
-  setTimeout(forceLoadAllImages, 1500);
-  setTimeout(forceLoadAllImages, 4000);
-
-  if (container && sceneEl) {
+  // === DESKTOP: 3D rotating carousel (only runs if carousel-scene is visible) ===
+  if (container && sceneEl && window.getComputedStyle(sceneEl).display !== 'none') {
     let rotation = 0, velocity = 0, isDragging = false, lastX = 0;
 
     function getAngle(i: number): number {
@@ -201,96 +225,55 @@ function getCardAngle(idx: number): number {
       return angle;
     }
 
-    if (isMobileCarousel) {
-      // === MOBILE: Flat horizontal scroll carousel ===
-      // Disable 3D transforms entirely — they cause image loading failures on mobile.
-      container.style.transform = 'none';
-      container.style.transformStyle = 'flat';
-      container.style.display = 'flex';
-      container.style.gap = '16px';
-      container.style.width = 'max-content';
-      container.style.height = 'auto';
-      container.style.position = 'relative';
-
-      sceneEl.style.perspective = 'none';
-      sceneEl.style.overflow = 'auto';
-      sceneEl.style.overflowX = 'auto';
-      sceneEl.style.overflowY = 'hidden';
-      sceneEl.style.WebkitOverflowScrolling = 'touch';
-      sceneEl.style.display = 'block';
-      sceneEl.style.height = 'auto';
-      sceneEl.style.padding = '20px 16px';
-
-      cards.forEach((card) => {
+    function updateCards() {
+      desktopCards.forEach((card, i) => {
+        const cardAngle = getAngle(i);
+        let diff = ((cardAngle + rotation) % 360 + 360) % 360;
+        if (diff > 180) diff = 360 - diff;
+        const t = diff / 180;
+        const scale = 1.0 - t * 0.45;
+        const opacity = 1.0 - t * 0.6;
+        const brightness = 1.0 - t * 0.5;
         const el = card as HTMLElement;
-        // Reset all 3D transforms — render flat
-        el.style.transform = 'none';
-        el.style.position = 'relative';
-        el.style.left = 'auto';
-        el.style.top = 'auto';
-        el.style.marginLeft = '0';
-        el.style.marginTop = '0';
-        el.style.opacity = '1';
-        el.style.filter = 'none';
-        el.style.flexShrink = '0';
-        el.style.width = '220px';
-        el.style.height = '320px';
-
-        if (el.classList.contains('game-day-card')) {
-          el.style.width = '320px';
-          el.style.height = '220px';
-        }
+        el.style.transform = `rotateY(${cardAngle}deg) translateZ(${R}px) scale(${scale})`;
+        el.style.opacity = String(opacity);
+        el.style.filter = `brightness(${brightness})`;
       });
-
-      // Auto-scroll to center on load
-      setTimeout(() => {
-        sceneEl.scrollLeft = (sceneEl.scrollWidth - sceneEl.clientWidth) / 2;
-      }, 100);
-
-    } else {
-      // === DESKTOP: Original 3D rotating carousel ===
-      function updateCards() {
-        cards.forEach((card, i) => {
-          const cardAngle = getAngle(i);
-          let diff = ((cardAngle + rotation) % 360 + 360) % 360;
-          if (diff > 180) diff = 360 - diff;
-          const t = diff / 180;
-          const scale = 1.0 - t * 0.45;
-          const opacity = 1.0 - t * 0.6;
-          const brightness = 1.0 - t * 0.5;
-          const el = card as HTMLElement;
-          el.style.transform = `rotateY(${cardAngle}deg) translateZ(${R}px) scale(${scale})`;
-          el.style.opacity = String(opacity);
-          el.style.filter = `brightness(${brightness})`;
-        });
-      }
-
-      sceneEl.addEventListener('wheel', (e) => { e.preventDefault(); velocity += e.deltaY * 0.3; }, { passive: false });
-      sceneEl.addEventListener('mousedown', (e) => { isDragging = true; lastX = e.clientX; });
-      window.addEventListener('mousemove', (e) => { if (!isDragging) return; velocity += (e.clientX - lastX) * 0.8; lastX = e.clientX; }, { passive: true });
-      window.addEventListener('mouseup', () => { isDragging = false; });
-      sceneEl.addEventListener('touchstart', (e) => { lastX = e.touches[0].clientX; }, { passive: true });
-      sceneEl.addEventListener('touchmove', (e) => { velocity += (e.touches[0].clientX - lastX) * 0.8; lastX = e.touches[0].clientX; }, { passive: true });
-
-      function loop() {
-        velocity *= 0.94;
-        rotation += velocity * 0.01;
-        container.style.transform = `rotateX(8deg) rotateY(${rotation}deg)`;
-        updateCards();
-        requestAnimationFrame(loop);
-      }
-      loop();
     }
+
+    sceneEl.addEventListener('wheel', (e) => { e.preventDefault(); velocity += e.deltaY * 0.3; }, { passive: false });
+    sceneEl.addEventListener('mousedown', (e) => { isDragging = true; lastX = e.clientX; });
+    window.addEventListener('mousemove', (e) => { if (!isDragging) return; velocity += (e.clientX - lastX) * 0.8; lastX = e.clientX; }, { passive: true });
+    window.addEventListener('mouseup', () => { isDragging = false; });
+    sceneEl.addEventListener('touchstart', (e) => { lastX = e.touches[0].clientX; }, { passive: true });
+    sceneEl.addEventListener('touchmove', (e) => { velocity += (e.touches[0].clientX - lastX) * 0.8; lastX = e.touches[0].clientX; }, { passive: true });
+
+    function loop() {
+      velocity *= 0.94;
+      rotation += velocity * 0.01;
+      container.style.transform = `rotateX(8deg) rotateY(${rotation}deg)`;
+      updateCards();
+      requestAnimationFrame(loop);
+    }
+    loop();
   }
 
-  // Lightbox — works on both mobile and desktop
-  cards.forEach(card => {
-    card.addEventListener('click', () => {
-      if (lbImg) lbImg.src = card.getAttribute('data-src') || '';
-      if (lbCaption) lbCaption.textContent = card.getAttribute('data-caption') || '';
-      lightbox?.classList.add('active');
-    });
-  });
+  // === MOBILE: Auto-scroll to center on load ===
+  const mobileCarousel = document.getElementById('mobile-carousel');
+  if (mobileCarousel && mobileCarousel.scrollWidth > mobileCarousel.clientWidth) {
+    setTimeout(() => {
+      mobileCarousel.scrollLeft = (mobileCarousel.scrollWidth - mobileCarousel.clientWidth) / 2;
+    }, 150);
+  }
+
+  // === LIGHTBOX — works on both mobile and desktop ===
+  function openLightbox(card: Element) {
+    if (lbImg) lbImg.src = card.getAttribute('data-src') || '';
+    if (lbCaption) lbCaption.textContent = card.getAttribute('data-caption') || '';
+    lightbox?.classList.add('active');
+  }
+  desktopCards.forEach(card => card.addEventListener('click', () => openLightbox(card)));
+  mobileCards.forEach(card => card.addEventListener('click', () => openLightbox(card)));
   lbClose?.addEventListener('click', () => lightbox?.classList.remove('active'));
   lightbox?.addEventListener('click', (e) => { if (e.target === lightbox) lightbox.classList.remove('active'); });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') lightbox?.classList.remove('active'); });
