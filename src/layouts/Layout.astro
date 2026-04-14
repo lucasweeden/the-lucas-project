@@ -22,49 +22,186 @@ const { title = "Lucas Weeden — Builder · Operator · Creator" } = Astro.prop
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <script is:inline>
-    // Change 10: Force dark mode always
     document.documentElement.setAttribute('data-theme', 'dark');
   </script>
 </head>
 <body>
   <slot />
 
-  <!-- Change 5: Coin clink sound on load. Change 6: No public/audio/background.mp3 found — skipped -->
-  <script is:inline>
-    function playCoinSound() {
-      try {
-        var ctx = new (window.AudioContext || window.webkitAudioContext)();
-        for (var i = 0; i < 10; i++) {
-          (function(idx) {
-            var delay = idx * 0.08 + Math.random() * 0.12;
-            setTimeout(function() {
-              var osc = ctx.createOscillator();
-              var gain = ctx.createGain();
-              var filter = ctx.createBiquadFilter();
-              osc.frequency.value = 2800 + Math.random() * 1400;
-              osc.type = 'sine';
-              filter.type = 'highpass';
-              filter.frequency.value = 1800;
-              gain.gain.setValueAtTime(0, ctx.currentTime);
-              gain.gain.linearRampToValueAtTime(0.25, ctx.currentTime + 0.003);
-              gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.18);
-              osc.connect(filter);
-              filter.connect(gain);
-              gain.connect(ctx.destination);
-              osc.start(ctx.currentTime);
-              osc.stop(ctx.currentTime + 0.2);
-            }, delay * 1000);
-          })(i);
-        }
-      } catch(e) {}
+  <!-- Music Player Widget — top-right corner, all pages -->
+  <div id="lp-music-player" style="position:fixed;top:16px;right:16px;z-index:10001;width:220px;height:64px;background:rgba(6,13,4,0.88);border:1px solid #3a7a2a;border-radius:32px;backdrop-filter:blur(12px);padding:10px 16px;display:flex;align-items:center;gap:8px;font-family:'Syne',sans-serif;">
+    <button id="mp-prev" class="mp-btn" aria-label="Previous">⏮</button>
+    <button id="mp-play" class="mp-btn" aria-label="Play">▶</button>
+    <button id="mp-next" class="mp-btn" aria-label="Next">⏭</button>
+    <div id="mp-track" style="flex:1;overflow:hidden;white-space:nowrap;font-size:11px;color:#8cd867;letter-spacing:0.5px;">
+      <span id="mp-track-text">Ready</span>
+    </div>
+    <button id="mp-mute" class="mp-btn" aria-label="Mute">🔊</button>
+  </div>
+
+  <style is:inline>
+    .mp-btn {
+      width:28px;height:28px;border-radius:50%;
+      background:rgba(90,186,50,0.15);border:1px solid #3a7a2a;color:#8cd867;
+      font-size:12px;display:flex;align-items:center;justify-content:center;
+      cursor:none;transition:background 150ms ease;flex-shrink:0;padding:0;
     }
-    document.addEventListener('click', function initAudio() {
-      playCoinSound();
-      document.removeEventListener('click', initAudio);
-    }, { once: true });
-    window.addEventListener('load', function() {
-      setTimeout(function() { try { playCoinSound(); } catch(e) {} }, 2800);
-    });
+    .mp-btn:hover { background:rgba(90,186,50,0.3); }
+    #mp-track { position:relative; }
+    #mp-track-text.scrolling {
+      display:inline-block;
+      animation:mpMarquee 8s linear infinite;
+    }
+    @keyframes mpMarquee {
+      0% { transform:translateX(0); }
+      100% { transform:translateX(-100%); }
+    }
+  </style>
+
+  <script is:inline>
+    (function() {
+      var playlist = [
+        '/audio/evgeny_bardyuzha-password-infinity-123276.mp3',
+        '/audio/artissizm-drift-phonk-200108.mp3',
+        '/audio/desifreemusic-90s-style-boom-bap-beat-with-dusty-vinyl-crackles-378424.mp3',
+        '/audio/dferun-20s-swing-rave-480544.mp3',
+        '/audio/fassounds-good-night-lofi-cozy-chill-music-160166%20(1).mp3',
+        '/audio/lazarosv-cosmic-drift-ii-409679.mp3',
+        '/audio/leberch-ambient-atmospheric-509533.mp3',
+        '/audio/tunetank-melodic-type-beat-349530.mp3',
+        '/audio/tunetank-presentation-beat-349420.mp3'
+      ];
+
+      var audio = new Audio();
+      audio.volume = 0;
+      var currentTrack = 0;
+      var isPlaying = false;
+      var musicStarted = false;
+
+      var playBtn = document.getElementById('mp-play');
+      var prevBtn = document.getElementById('mp-prev');
+      var nextBtn = document.getElementById('mp-next');
+      var muteBtn = document.getElementById('mp-mute');
+      var trackText = document.getElementById('mp-track-text');
+      var trackWrap = document.getElementById('mp-track');
+
+      function formatName(path) {
+        var name = path.split('/').pop().replace(/\.[^.]+$/, '');
+        name = decodeURIComponent(name);
+        return name.replace(/[-_]/g, ' ').replace(/\b\w/g, function(c) { return c.toUpperCase(); });
+      }
+
+      function updateTrackDisplay() {
+        if (!trackText) return;
+        var name = formatName(playlist[currentTrack]);
+        trackText.textContent = name;
+        trackText.className = '';
+        setTimeout(function() {
+          if (trackText.scrollWidth > (trackWrap ? trackWrap.clientWidth : 200)) {
+            trackText.className = 'scrolling';
+          }
+        }, 50);
+      }
+
+      function updatePlayButton() {
+        if (playBtn) playBtn.textContent = isPlaying ? '⏸' : '▶';
+      }
+
+      function loadTrack(index) {
+        currentTrack = ((index % playlist.length) + playlist.length) % playlist.length;
+        audio.src = playlist[currentTrack];
+        audio.load();
+        updateTrackDisplay();
+      }
+
+      function playTrack() {
+        audio.play().catch(function() {});
+        isPlaying = true;
+        updatePlayButton();
+      }
+
+      function pauseTrack() {
+        audio.pause();
+        isPlaying = false;
+        updatePlayButton();
+      }
+
+      function fadeIn() {
+        audio.volume = 0;
+        var fade = setInterval(function() {
+          if (audio.volume < 0.20) {
+            audio.volume = Math.min(audio.volume + 0.013, 0.20);
+          } else {
+            clearInterval(fade);
+          }
+        }, 100);
+      }
+
+      audio.addEventListener('ended', function() {
+        var next = currentTrack === 0 ? 1 : (currentTrack + 1);
+        if (next >= playlist.length) next = 1;
+        loadTrack(next);
+        playTrack();
+      });
+
+      function startMusic() {
+        if (!musicStarted) {
+          musicStarted = true;
+          var saved = sessionStorage.getItem('lp_music_track');
+          var savedTime = sessionStorage.getItem('lp_music_time');
+          if (saved !== null && parseInt(saved) > 0) {
+            loadTrack(parseInt(saved));
+            if (savedTime) audio.currentTime = parseFloat(savedTime);
+          } else {
+            loadTrack(0);
+          }
+          playTrack();
+          fadeIn();
+        }
+      }
+
+      document.addEventListener('click', startMusic, { once: true });
+      document.addEventListener('scroll', startMusic, { once: true });
+      document.addEventListener('keydown', startMusic, { once: true });
+      document.addEventListener('touchstart', startMusic, { once: true });
+
+      if (playBtn) playBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        if (!musicStarted) { startMusic(); return; }
+        if (isPlaying) { pauseTrack(); } else { playTrack(); }
+      });
+
+      if (nextBtn) nextBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        if (!musicStarted) startMusic();
+        var next = (currentTrack + 1) % playlist.length;
+        loadTrack(next);
+        playTrack();
+      });
+
+      if (prevBtn) prevBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        if (!musicStarted) startMusic();
+        var prev = (currentTrack - 1 + playlist.length) % playlist.length;
+        loadTrack(prev);
+        playTrack();
+      });
+
+      if (muteBtn) muteBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        audio.muted = !audio.muted;
+        muteBtn.textContent = audio.muted ? '🔇' : '🔊';
+        muteBtn.style.opacity = audio.muted ? '0.4' : '1';
+      });
+
+      window.addEventListener('beforeunload', function() {
+        sessionStorage.setItem('lp_music_track', String(currentTrack));
+        sessionStorage.setItem('lp_music_time', String(audio.currentTime));
+        sessionStorage.setItem('lp_music_playing', String(isPlaying));
+      });
+
+      updateTrackDisplay();
+    })();
   </script>
 </body>
 </html>
