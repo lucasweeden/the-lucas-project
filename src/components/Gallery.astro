@@ -14,7 +14,7 @@ const photos = [
   { src: "IMG_4848.jpeg", caption: "Pack Walk" },
   { src: "IMG_0856.jpeg", caption: "Camp Life" },
   { src: "IMG_1218.PNG", caption: "Game Day", isGameDay: true },
-  { src: "IMG_2829.jpeg", caption: "Great Grandpa Harold" },
+  { src: "IMG_2829.jpeg", caption: "Great Grandpa" },
   { src: "IMG_0045.jpeg", caption: "Dog Run" },
   { src: "IMG_5426.jpeg", caption: "Sand Dunes" },
   { src: "IMG_2282.jpeg", caption: "Baby Lucas" },
@@ -22,18 +22,36 @@ const photos = [
   { src: "IMG_1426.jpeg", caption: "Family" },
 ];
 const count = photos.length;
-const radius = 960;
+const radius = 900;
+const GAME_DAY_IDX = 13;
+// Game Day needs ~4.5 deg extra arc for its wider card (400px vs 260px)
+// Distribute that extra space: Game Day gets BASE + 4.5, other 19 cards each lose 4.5/19 ≈ 0.237 deg
+const GD_EXTRA = 4.5;
+const NORMAL_ANGLE = (360 - (360 / count + GD_EXTRA)) / (count - 1); // ~17.76 deg for normal cards
+const GD_ANGLE = 360 / count + GD_EXTRA; // ~22.5 deg for Game Day
+
+// Precompute cumulative angles for perfectly even visual spacing
+function getCardAngle(idx: number): number {
+  let angle = 0;
+  for (let i = 0; i < idx; i++) {
+    angle += (i === GAME_DAY_IDX) ? GD_ANGLE : NORMAL_ANGLE;
+  }
+  return angle;
+}
 ---
-<section class="site-section" id="gallery">
-  <div class="section-inner" style="display:block;position:relative;z-index:10;margin-bottom:72px;padding-bottom:0;">
+<section class="site-section" id="gallery" style="display:flex;flex-direction:column;align-items:stretch;">
+  <!-- EDIT 1: Text is in a separate block, above the carousel, never overlapping -->
+  <div class="gallery-heading">
     <div class="section-label">02 — The Life</div>
     <h2 class="section-title">LIVING WIDE OPEN</h2>
     <p class="section-subtitle">No filter. No highlight reel. Just the climb.</p>
   </div>
-  <div class="carousel-scene" id="carousel-scene" style="margin-top:72px;position:relative;z-index:5;">
+
+  <!-- EDIT 1+2: Carousel pushed down with clear separation -->
+  <div class="carousel-scene" id="carousel-scene">
     <div class="carousel-container" id="photoCarousel">
       {photos.map((photo, i) => {
-        const angle = (360 / count) * i;
+        const angle = getCardAngle(i);
         return (
           <div class={`carousel-card ${photo.isGameDay ? 'game-day-card' : ''}`}
             data-index={i} data-src={`/images/${photo.src}`} data-caption={photo.caption}
@@ -54,57 +72,80 @@ const radius = 960;
 </div>
 
 <style>
+  .gallery-heading {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 40px;
+    padding-bottom: 40px;
+    position: relative;
+    z-index: 2;
+    /* nothing below this can overlap — heading is in normal doc flow */
+  }
+
   .carousel-scene {
-    width: 100%; height: 600px;
-    perspective: 2400px; perspective-origin: 50% 40%;
-    display: flex; align-items: center; justify-content: center;
-    overflow: visible; position: relative;
+    width: 100%;
+    height: 580px;
+    margin-top: 160px; /* increased gap so text never overlaps any card at any rotation */
+    perspective: 2200px;
+    perspective-origin: 50% 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: visible;
+    position: relative;
   }
   .carousel-container {
-    width: 220px; height: 340px;
-    position: relative; transform-style: preserve-3d;
+    width: 260px; height: 400px;
+    position: relative;
+    transform-style: preserve-3d;
     transform: rotateX(8deg) rotateY(0deg);
   }
   .carousel-card {
-    position: absolute; width: 220px; height: 340px;
+    position: absolute;
+    width: 260px; height: 400px;
     border-radius: 12px; overflow: hidden;
     backface-visibility: visible;
     border: 2px solid rgba(90,186,50,0.4);
     box-shadow: 0 8px 32px rgba(0,0,0,0.6);
     transition: opacity 0.15s ease, filter 0.15s ease;
     will-change: transform, opacity;
+    /* center the card on the transform origin */
+    left: 50%; top: 50%;
+    margin-left: -130px; margin-top: -200px;
   }
   .carousel-card img {
-    width: 100%; height: 80%; object-fit: cover; object-position: center top; display: block;
+    width: 100%; height: 80%;
+    object-fit: cover; object-position: center top;
+    display: block;
   }
-  /* Fix 2: Game Day — horizontal landscape card */
   .game-day-card {
-    width: 400px !important;
-    height: 260px !important;
+    width: 400px !important; height: 260px !important;
+    margin-left: -200px !important; margin-top: -130px !important;
     transform-origin: center center;
   }
   .game-day-card img {
-    object-fit: cover;
+    object-fit: contain;
     object-position: center center;
-    width: 100%;
-    height: 80%;
+    background: #000;
   }
   .card-title {
-    height: 20%; display: flex; align-items: center; justify-content: center;
+    height: 20%;
+    display: flex; align-items: center; justify-content: center;
     background: rgba(6,13,4,0.9); color: #8cd867;
     font-family: 'Syne', sans-serif; font-size: 13px;
     letter-spacing: 1px; padding: 0 12px; text-align: center;
   }
   @media (max-width: 768px) {
-    .carousel-scene { height: 400px; }
-    .carousel-container { width: 160px; height: 260px; }
-    .carousel-card { width: 160px; height: 260px; }
-    .game-day-card { width: 280px !important; height: 200px !important; }
+    .gallery-heading { padding: 0 20px; }
+    .carousel-scene { height: 400px; margin-top: 60px; }
+    .carousel-container { width: 180px; height: 280px; }
+    .carousel-card { width: 180px; height: 280px; margin-left: -90px; margin-top: -140px; }
+    .game-day-card { width: 300px !important; height: 200px !important; margin-left: -150px !important; margin-top: -100px !important; }
   }
 </style>
 
 <script>
-  const scene = document.getElementById('carousel-scene');
+  const sceneEl = document.getElementById('carousel-scene');
   const container = document.getElementById('photoCarousel');
   const cards = document.querySelectorAll('.carousel-card');
   const lightbox = document.getElementById('lightbox');
@@ -112,45 +153,54 @@ const radius = 960;
   const lbCaption = document.getElementById('lightbox-caption');
   const lbClose = document.getElementById('lightbox-close');
   const total = cards.length;
-  const R = 960;
+  const R = 900;
+  const GD_I = 13;
+  const GD_EXTRA_JS = 4.5;
+  const NORMAL_A = (360 - (360 / total + GD_EXTRA_JS)) / (total - 1);
+  const GD_A = 360 / total + GD_EXTRA_JS;
 
-  if (container && scene) {
+  if (container && sceneEl) {
     let rotation = 0, velocity = 0, isDragging = false, lastX = 0;
 
-    const GAME_DAY_IDX = 13; // Game Day card index
-    function updateCardDepth() {
+    function getAngle(i: number): number {
+      let angle = 0;
+      for (let j = 0; j < i; j++) {
+        angle += (j === GD_I) ? GD_A : NORMAL_A;
+      }
+      return angle;
+    }
+
+    function updateCards() {
       cards.forEach((card, i) => {
-        let cardAngle = (360 / total) * i;
-        // Add angular spacing around wider Game Day card
-        if (i === GAME_DAY_IDX - 1) cardAngle -= 4;
-        if (i === GAME_DAY_IDX + 1) cardAngle += 4;
+        const cardAngle = getAngle(i);
         let diff = ((cardAngle + rotation) % 360 + 360) % 360;
         if (diff > 180) diff = 360 - diff;
         const t = diff / 180;
         const scale = 1.0 - t * 0.45;
         const opacity = 1.0 - t * 0.6;
         const brightness = 1.0 - t * 0.5;
-        (card as HTMLElement).style.transform = `rotateY(${cardAngle}deg) translateZ(${R}px) scale(${scale})`;
-        (card as HTMLElement).style.opacity = String(opacity);
-        (card as HTMLElement).style.filter = `brightness(${brightness})`;
+        const el = card as HTMLElement;
+        el.style.transform = `rotateY(${cardAngle}deg) translateZ(${R}px) scale(${scale})`;
+        el.style.opacity = String(opacity);
+        el.style.filter = `brightness(${brightness})`;
       });
     }
 
-    scene.addEventListener('wheel', (e) => { e.preventDefault(); velocity += e.deltaY * 0.3; }, { passive: false });
-    scene.addEventListener('mousedown', (e) => { isDragging = true; lastX = e.clientX; });
+    sceneEl.addEventListener('wheel', (e) => { e.preventDefault(); velocity += e.deltaY * 0.3; }, { passive: false });
+    sceneEl.addEventListener('mousedown', (e) => { isDragging = true; lastX = e.clientX; });
     window.addEventListener('mousemove', (e) => { if (!isDragging) return; velocity += (e.clientX - lastX) * 0.8; lastX = e.clientX; }, { passive: true });
     window.addEventListener('mouseup', () => { isDragging = false; });
-    scene.addEventListener('touchstart', (e) => { lastX = e.touches[0].clientX; }, { passive: true });
-    scene.addEventListener('touchmove', (e) => { velocity += (e.touches[0].clientX - lastX) * 0.8; lastX = e.touches[0].clientX; }, { passive: true });
+    sceneEl.addEventListener('touchstart', (e) => { lastX = e.touches[0].clientX; }, { passive: true });
+    sceneEl.addEventListener('touchmove', (e) => { velocity += (e.touches[0].clientX - lastX) * 0.8; lastX = e.touches[0].clientX; }, { passive: true });
 
-    function animateCarousel() {
+    function loop() {
       velocity *= 0.94;
       rotation += velocity * 0.01;
       container.style.transform = `rotateX(8deg) rotateY(${rotation}deg)`;
-      updateCardDepth();
-      requestAnimationFrame(animateCarousel);
+      updateCards();
+      requestAnimationFrame(loop);
     }
-    animateCarousel();
+    loop();
   }
 
   cards.forEach(card => {
