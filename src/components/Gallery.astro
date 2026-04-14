@@ -1,27 +1,29 @@
 ---
-// Change 2: Enhanced 3D carousel. Change 3: All photos have titles.
+// Change 4: Rebuilt CSS 3D carousel from scratch
 const photos = [
   { src: "IMG_4863.jpeg", caption: "Golden Hour" },
+  { src: "IMG_1530.jpeg", caption: "Powder Days" },
   { src: "IMG_6652.jpeg", caption: "On Stage" },
   { src: "IMG_3496.jpeg", caption: "Saddle Up" },
   { src: "IMG_4898.jpeg", caption: "Prom Night" },
   { src: "IMG_2047.jpeg", caption: "Texas Made" },
   { src: "IMG_9474.jpeg", caption: "Night Out" },
+  { src: "IMG_0717.jpeg", caption: "Island Life" },
   { src: "IMG_1001.jpeg", caption: "Golden Fields" },
   { src: "IMG_4459.jpeg", caption: "Acoustic" },
   { src: "IMG_2720.jpeg", caption: "Road Trip" },
+  { src: "IMG_4848.jpeg", caption: "Pack Walk" },
   { src: "IMG_0856.jpeg", caption: "Camp Life" },
-  { src: "IMG_2829.jpeg", caption: "Great Grandpa", coverFit: true },
+  { src: "IMG_1218.PNG", caption: "Game Day" },
+  { src: "IMG_2829.jpeg", caption: "Great Grandpa Harold" },
   { src: "IMG_0045.jpeg", caption: "Dog Run" },
+  { src: "IMG_5426.jpeg", caption: "Sand Dunes" },
+  { src: "IMG_2282.jpeg", caption: "Baby Lucas" },
   { src: "IMG_4463.jpeg", caption: "Festival" },
-  { src: "IMG_8617.jpeg", caption: "On The Roof" },
-  { src: "IMG_2975.jpeg", caption: "Rooftop Sunset" },
-  { src: "IMG_1501.jpeg", caption: "Baby Days" },
-  { src: "IMG_0153.JPG", caption: "Good Vibes" },
-  { src: "IMG_4561.jpeg", caption: "Adventure" },
-  { src: "IMG_1078.jpeg", caption: "Recovery" },
+  { src: "IMG_1426.jpeg", caption: "Family" },
 ];
-const cardCount = photos.length;
+const count = photos.length;
+const radius = 520;
 ---
 <section class="site-section" id="gallery">
   <div class="section-inner">
@@ -29,27 +31,15 @@ const cardCount = photos.length;
     <h2 class="section-title">LIVING WIDE OPEN</h2>
     <p class="section-subtitle">No filter. No highlight reel. Just the climb.</p>
   </div>
-  <div class="carousel-wrap" id="carousel-wrap" style="perspective:1800px;">
-    <div class="carousel-ring"></div>
-    <div class="carousel-inner" id="carousel-inner" style="transform-style:preserve-3d;transform:rotateX(12deg);">
+  <div class="carousel-scene" id="carousel-scene">
+    <div class="carousel-container" id="photoCarousel">
       {photos.map((photo, i) => {
-        const angle = (360 / cardCount) * i;
+        const angle = (360 / count) * i;
         return (
-          <div
-            class="carousel-card"
-            data-angle={angle}
-            data-src={`/images/${photo.src}`}
-            data-caption={photo.caption}
-            style={`transform: rotateY(${angle}deg) translateZ(1200px);`}
-          >
-            <img
-              src={`/images/${photo.src}`}
-              alt={photo.caption}
-              loading="lazy"
-              onerror="this.parentElement.style.display='none'"
-              style={photo.coverFit ? 'object-fit:cover;width:100%;height:100%;object-position:center;' : ''}
-            />
-            <div class="caption">{photo.caption}</div>
+          <div class="carousel-card" data-index={i} data-src={`/images/${photo.src}`} data-caption={photo.caption}
+            style={`transform: rotateY(${angle}deg) translateZ(${radius}px);`}>
+            <img src={`/images/${photo.src}`} alt={photo.caption} loading="lazy" onerror="this.parentElement.style.display='none'" />
+            <div class="card-title">{photo.caption}</div>
           </div>
         );
       })}
@@ -63,70 +53,93 @@ const cardCount = photos.length;
   <div class="lightbox-caption" id="lightbox-caption"></div>
 </div>
 
+<style>
+  .carousel-scene {
+    width: 100%; height: 600px;
+    perspective: 1400px; perspective-origin: 50% 40%;
+    display: flex; align-items: center; justify-content: center;
+    overflow: visible; position: relative;
+  }
+  .carousel-container {
+    width: 220px; height: 340px;
+    position: relative;
+    transform-style: preserve-3d;
+    transform: rotateX(8deg) rotateY(0deg);
+  }
+  .carousel-card {
+    position: absolute; width: 220px; height: 340px;
+    border-radius: 12px; overflow: hidden;
+    backface-visibility: visible;
+    border: 2px solid rgba(90,186,50,0.4);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+    transition: opacity 0.15s ease, filter 0.15s ease;
+  }
+  .carousel-card img {
+    width: 100%; height: 80%; object-fit: cover; object-position: center top; display: block;
+  }
+  .card-title {
+    height: 20%; display: flex; align-items: center; justify-content: center;
+    background: rgba(6,13,4,0.9); color: #8cd867;
+    font-family: 'Syne', sans-serif; font-size: 13px;
+    letter-spacing: 1px; padding: 0 12px; text-align: center;
+  }
+  @media (max-width: 768px) {
+    .carousel-scene { height: 400px; }
+    .carousel-container { width: 160px; height: 260px; }
+    .carousel-card { width: 160px; height: 260px; }
+  }
+</style>
+
 <script>
-  const wrap = document.getElementById('carousel-wrap');
-  const inner = document.getElementById('carousel-inner');
+  const scene = document.getElementById('carousel-scene');
+  const container = document.getElementById('photoCarousel');
+  const cards = document.querySelectorAll('.carousel-card');
   const lightbox = document.getElementById('lightbox');
   const lbImg = document.getElementById('lightbox-img') as HTMLImageElement;
   const lbCaption = document.getElementById('lightbox-caption');
   const lbClose = document.getElementById('lightbox-close');
-  const cards = document.querySelectorAll('.carousel-card');
-  const totalCards = cards.length;
+  const total = cards.length;
+  const R = 520;
 
-  if (inner && wrap) {
-    let currentAngle = 0;
+  if (container && scene) {
+    let rotation = 0;
     let velocity = 0;
     let isDragging = false;
-    let startX = 0;
+    let lastX = 0;
 
-    function updateCarousel() {
-      inner.style.transform = `rotateX(12deg) rotateY(${currentAngle}deg)`;
-
-      // Dynamic scale/opacity/shadow per card based on facing angle
+    function updateCardDepth() {
       cards.forEach((card, i) => {
-        const cardAngle = (360 / totalCards) * i;
-        let relAngle = ((currentAngle + cardAngle) % 360 + 360) % 360;
-        if (relAngle > 180) relAngle = 360 - relAngle;
-        // relAngle: 0 = front, 180 = back
-        const frontness = 1 - relAngle / 180;
-        const s = 0.55 + frontness * 0.45; // 0.55 → 1.0
-        const o = 0.5 + frontness * 0.5;   // 0.5 → 1.0
-        const el = card as HTMLElement;
-        el.style.opacity = String(o);
-        el.style.transform = `rotateY(${cardAngle}deg) translateZ(1200px) scale(${s})`;
-        if (frontness > 0.7) {
-          el.style.boxShadow = '0 20px 60px rgba(0,0,0,0.8), 0 0 30px rgba(90,186,50,0.3)';
-        } else {
-          el.style.boxShadow = '0 4px 20px rgba(0,0,0,0.2)';
-        }
+        const cardAngle = (360 / total) * i;
+        let diff = ((cardAngle + rotation) % 360 + 360) % 360;
+        if (diff > 180) diff = 360 - diff;
+        const t = diff / 180;
+        const scale = 1.0 - t * 0.45;
+        const opacity = 1.0 - t * 0.6;
+        const brightness = 1.0 - t * 0.5;
+        (card as HTMLElement).style.transform = `rotateY(${cardAngle}deg) translateZ(${R}px) scale(${scale})`;
+        (card as HTMLElement).style.opacity = String(opacity);
+        (card as HTMLElement).style.filter = `brightness(${brightness})`;
       });
     }
 
-    wrap.addEventListener('wheel', (e) => {
-      e.preventDefault();
-      velocity += e.deltaY * 0.08;
-    }, { passive: false });
-
-    wrap.addEventListener('mousedown', (e) => { isDragging = true; startX = e.clientX; velocity = 0; });
-    window.addEventListener('mousemove', (e) => {
-      if (!isDragging) return;
-      currentAngle += (e.clientX - startX) * 0.3;
-      startX = e.clientX;
-      updateCarousel();
-    });
+    scene.addEventListener('wheel', (e) => { e.preventDefault(); velocity += e.deltaY * 0.3; }, { passive: false });
+    scene.addEventListener('mousedown', (e) => { isDragging = true; lastX = e.clientX; });
+    window.addEventListener('mousemove', (e) => { if (!isDragging) return; velocity += (e.clientX - lastX) * 0.8; lastX = e.clientX; });
     window.addEventListener('mouseup', () => { isDragging = false; });
+    scene.addEventListener('touchstart', (e) => { lastX = e.touches[0].clientX; });
+    scene.addEventListener('touchmove', (e) => { velocity += (e.touches[0].clientX - lastX) * 0.8; lastX = e.touches[0].clientX; });
 
     function animateCarousel() {
+      velocity *= 0.94;
+      rotation += velocity * 0.01;
+      container.style.transform = `rotateX(8deg) rotateY(${rotation}deg)`;
+      updateCardDepth();
       requestAnimationFrame(animateCarousel);
-      if (!isDragging && Math.abs(velocity) > 0.01) {
-        currentAngle += velocity;
-        velocity *= 0.95;
-      }
-      updateCarousel();
     }
     animateCarousel();
   }
 
+  // Lightbox
   cards.forEach(card => {
     card.addEventListener('click', () => {
       if (lbImg) lbImg.src = card.getAttribute('data-src') || '';
@@ -134,7 +147,6 @@ const cardCount = photos.length;
       lightbox?.classList.add('active');
     });
   });
-
   lbClose?.addEventListener('click', () => lightbox?.classList.remove('active'));
   lightbox?.addEventListener('click', (e) => { if (e.target === lightbox) lightbox.classList.remove('active'); });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') lightbox?.classList.remove('active'); });

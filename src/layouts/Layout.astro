@@ -8,7 +8,7 @@ const { title = "Lucas Weeden — Builder · Operator · Creator" } = Astro.prop
 <html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
   <title>{title}</title>
   <meta name="description" content="The Lucas Project — documenting the real-time build of businesses, brands, and a life lived wide open. $10M+ in sales, AI pivot, and always building." />
   <meta property="og:title" content="Lucas Weeden — The Lucas Project" />
@@ -23,12 +23,23 @@ const { title = "Lucas Weeden — Builder · Operator · Creator" } = Astro.prop
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <script is:inline>
     document.documentElement.setAttribute('data-theme', 'dark');
+    // Device detection
+    (function() {
+      var ua = navigator.userAgent;
+      var w = window.innerWidth;
+      var d = 'desktop';
+      if (/Mobi|Android|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua) || w < 768) d = 'mobile';
+      else if (/iPad|Tablet/i.test(ua) || (w >= 768 && w < 1200)) d = 'tablet';
+      document.documentElement.setAttribute('data-device', d);
+      document.documentElement.classList.add('device-' + d);
+      sessionStorage.setItem('lp_device', d);
+    })();
   </script>
 </head>
 <body>
   <!-- Splash Screen -->
-  <div id="lp-splash" style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:#050f02;z-index:999999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;cursor:none;transition:opacity 600ms ease;">
-    <div id="splash-coin-wrapper" style="width:180px;height:180px;border-radius:50%;cursor:none;transition:transform 200ms ease,box-shadow 200ms ease;">
+  <div id="lp-splash" style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:#050f02;z-index:999999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;transition:opacity 600ms ease;">
+    <div id="splash-coin-wrapper" style="width:180px;height:180px;border-radius:50%;transition:transform 200ms ease,box-shadow 200ms ease;">
       <img id="splash-coin" src="/images/smallLucas_Project_Logo.png" alt="The Lucas Project" style="width:100%;height:100%;border-radius:50%;display:block;" />
     </div>
     <p id="splash-prompt" style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:#8cd867;letter-spacing:6px;margin:0;">CLICK TO ENTER</p>
@@ -38,7 +49,7 @@ const { title = "Lucas Weeden — Builder · Operator · Creator" } = Astro.prop
   <slot />
 
   <!-- Music Player Widget -->
-  <div id="lp-music-player" style="position:fixed;top:16px;right:16px;z-index:10001;width:220px;height:64px;background:rgba(6,13,4,0.88);border:1px solid #3a7a2a;border-radius:32px;backdrop-filter:blur(12px);padding:10px 16px;display:flex;align-items:center;gap:8px;font-family:'Syne',sans-serif;">
+  <div id="lp-music-player" style="position:fixed;top:72px;right:16px;z-index:10001;width:220px;height:64px;background:rgba(6,13,4,0.88);border:1px solid #3a7a2a;border-radius:32px;backdrop-filter:blur(12px);padding:10px 16px;display:flex;align-items:center;gap:8px;font-family:'Syne',sans-serif;">
     <button id="mp-prev" class="mp-btn" aria-label="Previous">⏮</button>
     <button id="mp-play" class="mp-btn" aria-label="Play">▶</button>
     <button id="mp-next" class="mp-btn" aria-label="Next">⏭</button>

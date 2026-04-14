@@ -1,8 +1,10 @@
 // v6 Change 4: 1000 self-moving LP coins with physics-based cursor interaction
 
 export function initFloatingCoins() {
-  const isMobile = window.innerWidth < 768;
-  const count = isMobile ? 80 : 1000;
+  const device = document.documentElement.getAttribute('data-device') || 'desktop';
+  const isMobile = device === 'mobile';
+  const isTablet = device === 'tablet';
+  const count = isMobile ? 50 : (isTablet ? 150 : 1000);
   const container = document.getElementById('lp-coin-bg');
   if (!container) return;
 
@@ -104,8 +106,10 @@ export function initFloatingCoins() {
   animate();
 }
 
-// Cursor green spark flares
+// Cursor green spark flares (disabled on mobile)
 export function initCursorSparks() {
+  const device = document.documentElement.getAttribute('data-device') || 'desktop';
+  if (device === 'mobile') return; // skip on mobile
   const canvas = document.createElement('canvas');
   canvas.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:9998;pointer-events:none;';
   document.body.appendChild(canvas);

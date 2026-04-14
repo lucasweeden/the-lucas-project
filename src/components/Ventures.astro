@@ -1,5 +1,4 @@
 ---
-// Change 10: 4 cards (2x2), updated badges/copy. Change 17: new logo files.
 ---
 <section class="site-section" id="ventures">
   <div class="section-inner">
@@ -24,8 +23,14 @@
         <div class="card-body">The hub. Documenting the build in public across YouTube, Instagram, and TikTok. All roads lead here.</div>
         <span class="card-badge green">Active</span>
       </div>
-      <div class="card tilt-card">
-        <div style="display:inline-block;background:#000000;border-radius:10px;padding:10px;margin-bottom:16px;">
+      <!-- Change 6: SDE hidden until hover -->
+      <div class="card tilt-card sde-card" style="position:relative;overflow:hidden;">
+        <div class="sde-coming-soon">COMING SOON</div>
+        <div class="sde-overlay" id="sde-overlay">
+          <div style="opacity:0.08;"><img src="/images/sde-logo.png" alt="" style="filter:invert(1);width:60px;height:60px;margin:0 auto;" /></div>
+          <div style="color:#3a7a2a;opacity:0.2;font-family:'Bebas Neue',sans-serif;font-size:32px;margin-top:16px;">???</div>
+        </div>
+        <div style="display:inline-block;background:#000;border-radius:10px;padding:10px;margin-bottom:16px;">
           <img src="/images/sde-logo.png" alt="Scurvy Dog Empire" style="filter:invert(1);width:60px;height:60px;object-fit:contain;display:block;" />
         </div>
         <div class="card-title">Scurvy Dog Empire</div>
@@ -35,3 +40,21 @@
     </div>
   </div>
 </section>
+
+<style>
+  .sde-card { position: relative; }
+  .sde-coming-soon {
+    position: absolute; top: -18px; left: 50%; transform: translateX(-50%);
+    font-family: 'Syne', sans-serif; font-size: 10px; letter-spacing: 3px;
+    color: rgba(140,216,103,0.4); z-index: 6; white-space: nowrap;
+  }
+  .sde-overlay {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    z-index: 5; background: #060d04;
+    border: 1px solid rgba(58,122,42,0.2); border-radius: 16px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    opacity: 1; transition: opacity 400ms ease;
+  }
+  .sde-card:hover .sde-overlay { opacity: 0; }
+  .sde-card:hover { box-shadow: 0 0 40px rgba(90,186,50,0.4); }
+</style>

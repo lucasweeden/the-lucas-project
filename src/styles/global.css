@@ -850,3 +850,33 @@ img:not([src]) { display: none; }
 @media (max-width: 480px) {
   .social-grid { grid-template-columns: 1fr; }
 }
+
+/* --- Device-specific responsive overrides (Change 1) --- */
+
+/* Mobile */
+[data-device="mobile"] .site-section { padding: 40px 0; }
+[data-device="mobile"] .section-inner { padding: 0 20px; }
+[data-device="mobile"] .section-title { font-size: clamp(28px, 8vw, 48px); }
+[data-device="mobile"] .hero-title-line { font-size: clamp(36px, 12vw, 52px); }
+[data-device="mobile"] .nav-center { display: none; }
+[data-device="mobile"] .hamburger { display: flex; }
+[data-device="mobile"] .two-col,
+[data-device="mobile"] .three-col,
+[data-device="mobile"] .four-col,
+[data-device="mobile"] .equal-cards { grid-template-columns: 1fr !important; }
+[data-device="mobile"] .stats-bar { grid-template-columns: 1fr; }
+[data-device="mobile"] .scroll-progress-v { display: none; }
+[data-device="mobile"] #lp-music-player { width: 160px !important; top: 60px !important; right: 8px !important; }
+[data-device="mobile"] .mp-btn { width: 24px !important; height: 24px !important; font-size: 10px !important; }
+[data-device="mobile"] .hero-canvas { opacity: 0.6; }
+[data-device="mobile"] .ticker-banner span { font-size: 12px !important; }
+[data-device="mobile"] .site-footer { flex-direction: column; gap: 12px; text-align: center; }
+[data-device="mobile"] .footer-social-grid { grid-template-columns: repeat(2, 1fr) !important; }
+
+/* Tablet */
+[data-device="tablet"] .three-col,
+[data-device="tablet"] .four-col { grid-template-columns: repeat(2, 1fr); }
+[data-device="tablet"] .section-title { font-size: clamp(36px, 7vw, 72px); }
+[data-device="tablet"] .site-nav { padding: 12px 24px; }
+[data-device="tablet"] .nav-pill-front,
+[data-device="tablet"] .nav-pill-back { font-size: 11px; padding: 6px 14px; }

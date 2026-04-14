@@ -1,12 +1,20 @@
 ---
 ---
-<!-- Change 1: LP logo INSIDE the circle ring, consolidated into one element -->
-<div id="lp-cursor" style="position:fixed;z-index:99999;pointer-events:none;width:56px;height:56px;border:2px solid #5aba32;border-radius:50%;transform:translate(-50%,-50%);transition:width 0.2s ease,height 0.2s ease,border-color 0.2s ease;">
+<!-- Change 3: Cursor z-index above splash, visible everywhere -->
+<div id="lp-cursor" style="position:fixed;z-index:9999999;pointer-events:none;width:56px;height:56px;border:2px solid #5aba32;border-radius:50%;transform:translate(-50%,-50%);transition:width 0.2s ease,height 0.2s ease,border-color 0.2s ease;">
   <img src="/images/smallLucas_Project_Logo.png" alt="" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:32px;height:32px;border-radius:50%;pointer-events:none;transition:width 0.2s ease,height 0.2s ease;" id="lp-cursor-img" />
 </div>
 
 <style is:global>
-  * { cursor: none !important; }
+  /* Desktop: hide cursor. Mobile: show default */
+  @media (pointer: fine) and (min-width: 769px) {
+    * { cursor: none !important; }
+  }
+  [data-device="mobile"] * { cursor: auto !important; }
+  [data-device="mobile"] #lp-cursor { display: none !important; }
+  /* Tablet: smaller cursor */
+  [data-device="tablet"] #lp-cursor { width: 44px !important; height: 44px !important; }
+  [data-device="tablet"] #lp-cursor-img { width: 26px !important; height: 26px !important; }
 </style>
 
 <script is:inline>
@@ -15,12 +23,8 @@
       var el = document.getElementById('lp-cursor');
       var img = document.getElementById('lp-cursor-img');
       var mx = 0, my = 0, cx = 0, cy = 0;
-
-      document.addEventListener('mousemove', function(e) {
-        mx = e.clientX; my = e.clientY;
-      });
-
-      var hoverSel = 'a, button, .carousel-card, .card, .social-card, .btn-ghost, .contact-email-btn, .footer-social-pill';
+      document.addEventListener('mousemove', function(e) { mx = e.clientX; my = e.clientY; });
+      var hoverSel = 'a, button, .carousel-card, .card, .social-card, .social-card-big, .btn-ghost, .contact-email-btn, .footer-social-pill';
       document.addEventListener('mouseover', function(e) {
         if (e.target && e.target.closest && e.target.closest(hoverSel) && el) {
           el.style.width = '70px'; el.style.height = '70px'; el.style.borderColor = '#8cd867';
@@ -33,10 +37,8 @@
           if (img) { img.style.width = '32px'; img.style.height = '32px'; }
         }
       });
-
       function anim() {
-        cx += (mx - cx) * 0.12;
-        cy += (my - cy) * 0.12;
+        cx += (mx - cx) * 0.12; cy += (my - cy) * 0.12;
         if (el) { el.style.left = cx + 'px'; el.style.top = cy + 'px'; }
         requestAnimationFrame(anim);
       }
