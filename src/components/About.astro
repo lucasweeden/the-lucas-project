@@ -119,13 +119,14 @@ const timeline = [
 
       const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
 
-      const renderer = new THREE.WebGLRenderer({ canvas: stairCanvas, antialias: true });
+      const isMobileStair = window.innerWidth <= 768 || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+      const renderer = new THREE.WebGLRenderer({ canvas: stairCanvas, antialias: !isMobileStair });
       renderer.setSize(window.innerWidth, window.innerHeight);
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.setPixelRatio(isMobileStair ? 1 : Math.min(window.devicePixelRatio, 2));
       // NO tone mapping — photos render in true sRGB colors
       renderer.toneMapping = THREE.NoToneMapping;
       renderer.outputColorSpace = THREE.SRGBColorSpace;
-      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.enabled = !isMobileStair;
       renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
       // --- COLUMN ---

@@ -6,6 +6,10 @@ const tickerText = "THE LUCAS PROJECT · IT'S ABOUT THAT TIME · BUILDER · OPER
     <img src="/images/IMG_1530.jpeg" alt="" loading="eager" />
   </div>
   <canvas class="hero-canvas" id="hero-canvas"></canvas>
+  <!-- Static coin fallback for mobile (no WebGL) -->
+  <div class="hero-coin-static" id="hero-coin-static">
+    <img src="/images/smallLucas_Project_Logo.png" alt="LP Coin" />
+  </div>
   <div class="hero-content">
     <div class="hero-label">THE LUCAS PROJECT</div>
     <div class="hero-title-line">LUCAS</div>
@@ -30,12 +34,48 @@ const tickerText = "THE LUCAS PROJECT · IT'S ABOUT THAT TIME · BUILDER · OPER
 
 <img src="/images/smallLucas_Project_Logo.png" alt="" class="persistent-coin" id="persistent-coin" />
 
+<style>
+  .hero-coin-static {
+    display: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 3;
+    pointer-events: none;
+  }
+  .hero-coin-static img {
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    box-shadow: 0 0 40px rgba(90, 186, 50, 0.4), 0 0 80px rgba(90, 186, 50, 0.2);
+    animation: coinPulse 3s ease-in-out infinite;
+  }
+  @keyframes coinPulse {
+    0%, 100% { transform: scale(1); opacity: 0.95; }
+    50% { transform: scale(1.05); opacity: 1; }
+  }
+  @media (max-width: 768px) {
+    .hero-coin-static { display: block; }
+    .hero-canvas { display: none !important; }
+  }
+</style>
+
 <script>
   import * as THREE from 'three';
   import { gsap } from 'gsap';
 
+  const isMobile = window.innerWidth <= 768 || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
   const canvas = document.getElementById('hero-canvas') as HTMLCanvasElement;
-  if (canvas) {
+  const staticCoin = document.getElementById('hero-coin-static');
+
+  // On mobile: hide canvas, show static coin, skip all WebGL
+  if (isMobile && canvas) {
+    canvas.style.display = 'none';
+    if (staticCoin) staticCoin.style.display = 'block';
+  }
+
+  if (canvas && !isMobile) {
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100);
     camera.position.z = 6;
