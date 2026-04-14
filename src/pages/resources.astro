@@ -5,15 +5,16 @@ import Footer from '../components/Footer.astro';
 import ScrollProgress from '../components/ScrollProgress.astro';
 import CustomCursor from '../components/CustomCursor.astro';
 
+// Change 7: Platform name only, no handles
 const socials = [
-  { platform: "YouTube", handle: "@the.lucas.project", url: "https://youtube.com/@the.lucas.project.1", anim: "bounce" },
-  { platform: "Instagram", handle: "@the.lucas.project", url: "https://www.instagram.com/the.lucas.project", anim: "spin" },
-  { platform: "TikTok", handle: "@lucas.project", url: "https://www.tiktok.com/@lucas.project", anim: "wiggle" },
-  { platform: "LinkedIn", handle: "Lucas Weeden", url: "https://www.linkedin.com/in/lucas-weeden-6721133bb", anim: "slide" },
-  { platform: "Facebook", handle: "The Lucas Project", url: "https://www.facebook.com/share/18Th9LsXYL/", anim: "pulse" },
-  { platform: "Threads", handle: "@the.lucas.project", url: "https://www.threads.com/@the.lucas.project", anim: "rock" },
-  { platform: "Snapchat", handle: "lucas.weeden", url: "https://snapchat.com/t/66goy6LY", anim: "flip" },
-  { platform: "Instagram", handle: "@lucas.weeden", url: "https://www.instagram.com/lucas.weeden", anim: "glow" },
+  { platform: "YouTube", url: "https://youtube.com/@the.lucas.project.1", anim: "bounce" },
+  { platform: "Instagram", url: "https://www.instagram.com/the.lucas.project", anim: "spin" },
+  { platform: "TikTok", url: "https://www.tiktok.com/@lucas.project", anim: "wiggle" },
+  { platform: "LinkedIn", url: "https://www.linkedin.com/in/lucas-weeden-6721133bb", anim: "slide" },
+  { platform: "Facebook", url: "https://www.facebook.com/share/18Th9LsXYL/", anim: "pulse" },
+  { platform: "Threads", url: "https://www.threads.com/@the.lucas.project", anim: "rock" },
+  { platform: "Snapchat", url: "https://snapchat.com/t/66goy6LY", anim: "flip" },
+  { platform: "Instagram (Personal)", url: "https://www.instagram.com/lucas.weeden", anim: "glow" },
 ];
 ---
 
@@ -22,31 +23,29 @@ const socials = [
   <Nav />
   <CustomCursor />
 
-  <!-- Home button — fixed top-left -->
   <a href="/" id="home-btn" style="position:fixed;top:16px;left:16px;z-index:10000;background:#3a7a2a;color:#e8f5e0;border-radius:24px;padding:8px 18px;font-family:'Syne',sans-serif;font-size:13px;letter-spacing:1px;text-decoration:none;font-weight:600;transition:background 0.2s ease;">← Home</a>
 
   <main style="position: relative; z-index: 2; min-height: 100vh;">
 
-    <!-- SECTION A: Follow The Journey — first thing visible -->
+    <!-- Change 7: 2x bigger social bubbles, platform name only -->
     <section class="site-section" id="social" style="min-height:100vh;display:flex;align-items:center;">
       <div class="section-inner">
         <div class="section-label" style="text-align:center;">Stay Connected</div>
         <h2 class="section-title" style="text-align:center;">FOLLOW THE JOURNEY</h2>
-        <div class="social-grid">
+        <div class="social-grid-big">
           {socials.map((s) => (
-            <a href={s.url} target="_blank" rel="noopener" class="social-card" data-anim={s.anim}>
-              <div class="social-icon">
+            <a href={s.url} target="_blank" rel="noopener" class="social-card-big" data-anim={s.anim}>
+              <div class="social-icon-big">
                 <img src="/images/smallLucas_Project_Logo.png" alt="LP" />
               </div>
-              <div class="social-platform">{s.platform}</div>
-              <div class="social-handle">{s.handle}</div>
+              <div class="social-platform-big">{s.platform}</div>
             </a>
           ))}
         </div>
       </div>
     </section>
 
-    <!-- SECTION B: Resources -->
+    <!-- Resources section -->
     <section class="site-section" id="resources">
       <div class="section-inner" style="text-align: center;">
         <div class="section-label">09 — Resources</div>
@@ -54,10 +53,9 @@ const socials = [
 
         <div style="display: inline-flex; align-items: center; gap: 12px; margin-bottom: 40px; padding: 12px 20px; border: 1px solid var(--border); border-radius: 8px; background: var(--card-bg);">
           <span style="font-family: 'Syne', sans-serif; font-size: 14px; letter-spacing: 0.05em; color: var(--text); user-select: all;">lucasweeden.com/resources</span>
-          <button id="copy-link-btn" style="font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; padding: 8px 16px; border: 1px solid var(--accent); background: transparent; color: var(--accent); border-radius: 4px; transition: all 0.3s ease;">Copy Link</button>
+          <button id="copy-link-btn" style="font-family:'Syne',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;padding:8px 16px;border:1px solid var(--accent);background:transparent;color:var(--accent);border-radius:4px;transition:all 0.3s ease;">Copy Link</button>
         </div>
 
-        <!-- Resource cards -->
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px;max-width:800px;margin:0 auto 48px;text-align:left;">
           <div class="card" style="padding:24px;">
             <div class="card-title" style="font-size:20px;">Collabs</div>
@@ -73,20 +71,108 @@ const socials = [
           </div>
         </div>
 
-        <a href="mailto:Lucasproject@lucasweeden.com" class="contact-email-btn">
+        <!-- Change 6: Email button opens inline form -->
+        <button id="email-form-toggle" class="contact-email-btn" type="button">
           Lucasproject@lucasweeden.com
-        </a>
+        </button>
       </div>
     </section>
 
-    <!-- Scroll-to-home trap zone -->
+    <!-- Scroll-to-home trap -->
     <div id="scroll-trap" style="height:300vh;position:relative;">
       <div id="back-home-hint" style="position:sticky;top:50%;text-align:center;font-family:'Syne',sans-serif;font-size:18px;color:var(--accent);opacity:0;transition:opacity 0.5s ease;letter-spacing:0.1em;">← Back to Home</div>
     </div>
   </main>
 
+  <!-- Change 6: Email form modal -->
+  <div id="email-modal" style="position:fixed;bottom:0;left:0;width:100%;max-height:85vh;background:#060d04;border-top:2px solid #3a7a2a;border-radius:20px 20px 0 0;padding:40px;z-index:10000;transform:translateY(100%);transition:transform 300ms ease;backdrop-filter:blur(20px);overflow-y:auto;">
+    <button id="email-modal-close" style="position:absolute;top:16px;right:20px;background:none;border:none;color:#5aba32;font-size:24px;cursor:none;">✕</button>
+    <h3 style="font-family:'Bebas Neue',sans-serif;font-size:32px;color:#8cd867;margin-bottom:24px;text-align:center;letter-spacing:2px;">GET IN TOUCH</h3>
+    <form id="contact-form" action="https://formspree.io/f/xpwdjkeo" method="POST" style="max-width:500px;margin:0 auto;display:flex;flex-direction:column;gap:14px;">
+      <input type="text" name="name" placeholder="Your Name" required class="form-field" />
+      <input type="email" name="email" placeholder="Your Email" required class="form-field" />
+      <input type="text" name="subject" placeholder="Subject" class="form-field" />
+      <textarea name="message" placeholder="Your message..." required class="form-field" style="min-height:140px;resize:vertical;"></textarea>
+      <button type="submit" style="width:100%;background:#3a7a2a;color:#e8f5e0;font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;border:none;border-radius:8px;padding:14px;cursor:none;transition:background 200ms ease;">SEND MESSAGE</button>
+    </form>
+    <div id="form-success" style="display:none;text-align:center;color:#8cd867;font-family:'Syne',sans-serif;font-size:18px;margin-top:24px;">Message sent. I'll be in touch.</div>
+  </div>
+
   <Footer />
 </Layout>
+
+<style>
+  .form-field {
+    background: rgba(26,77,10,0.3);
+    border: 1px solid #3a7a2a;
+    border-radius: 8px;
+    color: #e8f5e0;
+    padding: 12px 16px;
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .form-field:focus {
+    border-color: #5aba32;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(90,186,50,0.2);
+  }
+  /* Change 7: 2x bigger social cards */
+  .social-grid-big {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+  }
+  .social-card-big {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    padding: 32px 24px;
+    text-align: center;
+    text-decoration: none;
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    min-height: 160px;
+    justify-content: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+  }
+  .social-card-big:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px var(--shadow);
+    border-color: var(--accent);
+    color: var(--text);
+  }
+  .social-icon-big img { width: 56px; height: 56px; border-radius: 50%; }
+  .social-platform-big {
+    font-family: 'Syne', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  /* Animations */
+  .social-card-big[data-anim="bounce"] { animation: socBounce 1.2s ease-in-out infinite; }
+  .social-card-big[data-anim="spin"] { animation: socSpin 4s linear infinite; }
+  .social-card-big[data-anim="wiggle"] { animation: socWiggle 0.4s ease-in-out infinite; }
+  .social-card-big[data-anim="slide"] { animation: socSlide 2s ease-in-out infinite; }
+  .social-card-big[data-anim="pulse"] { animation: socPulse 1.5s ease-in-out infinite; }
+  .social-card-big[data-anim="rock"] { animation: socRock 2s ease-in-out infinite; }
+  .social-card-big[data-anim="flip"] { animation: socFlip 1.8s ease-in-out infinite; }
+  .social-card-big[data-anim="glow"] { animation: socGlow 2s ease-in-out infinite; }
+  .social-card-big { animation-play-state: paused; }
+  .social-card-big.anim-active { animation-play-state: running; }
+
+  @media (max-width: 768px) {
+    .social-grid-big { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 480px) {
+    .social-grid-big { grid-template-columns: 1fr; }
+  }
+</style>
 
 <script>
   // Copy link
@@ -97,14 +183,40 @@ const socials = [
     });
   });
 
-  // Social card animations
-  const socialGrid = document.querySelector('.social-grid');
-  if (socialGrid) {
-    // Activate immediately since it's above the fold
-    socialGrid.querySelectorAll('.social-card').forEach((card, i) => {
-      setTimeout(() => card.classList.add('anim-active'), i * 100 + 500);
-    });
-  }
+  // Social card animations — activate immediately
+  document.querySelectorAll('.social-card-big').forEach((card, i) => {
+    setTimeout(() => card.classList.add('anim-active'), i * 100 + 500);
+  });
+
+  // Email form modal
+  const emailToggle = document.getElementById('email-form-toggle');
+  const emailModal = document.getElementById('email-modal');
+  const emailClose = document.getElementById('email-modal-close');
+  const contactForm = document.getElementById('contact-form') as HTMLFormElement;
+  const formSuccess = document.getElementById('form-success');
+
+  emailToggle?.addEventListener('click', () => {
+    if (emailModal) emailModal.style.transform = 'translateY(0)';
+  });
+  emailClose?.addEventListener('click', () => {
+    if (emailModal) emailModal.style.transform = 'translateY(100%)';
+  });
+
+  contactForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    try {
+      await fetch(contactForm.action, {
+        method: 'POST',
+        body: new FormData(contactForm),
+        headers: { 'Accept': 'application/json' }
+      });
+      contactForm.style.display = 'none';
+      if (formSuccess) formSuccess.style.display = 'block';
+    } catch {
+      contactForm.style.display = 'none';
+      if (formSuccess) { formSuccess.textContent = 'Message sent. I\'ll be in touch.'; formSuccess.style.display = 'block'; }
+    }
+  });
 
   // Scroll-to-home trap
   const trap = document.getElementById('scroll-trap');
@@ -121,32 +233,19 @@ const socials = [
   }
 
   window.addEventListener('scroll', () => {
-    if (hint) {
-      const trapRect = trap?.getBoundingClientRect();
-      if (trapRect && trapRect.top < window.innerHeight) {
-        const progress = Math.min(1, (window.innerHeight - trapRect.top) / (trapRect.height * 0.3));
+    if (hint && trap) {
+      const rect = trap.getBoundingClientRect();
+      if (rect.top < window.innerHeight) {
+        const progress = Math.min(1, (window.innerHeight - rect.top) / (rect.height * 0.3));
         hint.style.opacity = String(Math.min(progress, 0.8));
-      } else {
-        hint.style.opacity = '0';
-      }
+      } else { hint.style.opacity = '0'; }
     }
   });
 
   window.addEventListener('wheel', (e) => {
     if (trapActive && e.deltaY > 0) {
       scrollTicks++;
-      if (scrollTicks >= 3) {
-        window.location.href = '/';
-      }
+      if (scrollTicks >= 3) window.location.href = '/';
     }
   });
 </script>
-
-<style>
-  @media (max-width: 768px) {
-    .social-grid { grid-template-columns: repeat(2, 1fr) !important; }
-  }
-  @media (max-width: 480px) {
-    .social-grid { grid-template-columns: 1fr !important; }
-  }
-</style>

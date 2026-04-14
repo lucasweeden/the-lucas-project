@@ -1,5 +1,5 @@
 ---
-// Change 6: Gallery photo title updates
+// Change 2: Enhanced 3D carousel. Change 3: All photos have titles.
 const photos = [
   { src: "IMG_4863.jpeg", caption: "Golden Hour" },
   { src: "IMG_6652.jpeg", caption: "On Stage" },
@@ -11,7 +11,7 @@ const photos = [
   { src: "IMG_4459.jpeg", caption: "Acoustic" },
   { src: "IMG_2720.jpeg", caption: "Road Trip" },
   { src: "IMG_0856.jpeg", caption: "Camp Life" },
-  { src: "IMG_2829.jpeg", caption: "Great Grandpa Harold", coverFit: true },
+  { src: "IMG_2829.jpeg", caption: "Great Grandpa", coverFit: true },
   { src: "IMG_0045.jpeg", caption: "Dog Run" },
   { src: "IMG_4463.jpeg", caption: "Festival" },
   { src: "IMG_8617.jpeg", caption: "On The Roof" },
@@ -21,6 +21,7 @@ const photos = [
   { src: "IMG_4561.jpeg", caption: "Adventure" },
   { src: "IMG_1078.jpeg", caption: "Recovery" },
 ];
+const cardCount = photos.length;
 ---
 <section class="site-section" id="gallery">
   <div class="section-inner">
@@ -28,25 +29,25 @@ const photos = [
     <h2 class="section-title">LIVING WIDE OPEN</h2>
     <p class="section-subtitle">No filter. No highlight reel. Just the climb.</p>
   </div>
-  <div class="carousel-wrap" id="carousel-wrap">
+  <div class="carousel-wrap" id="carousel-wrap" style="perspective:1800px;">
     <div class="carousel-ring"></div>
-    <div class="carousel-inner" id="carousel-inner">
+    <div class="carousel-inner" id="carousel-inner" style="transform-style:preserve-3d;transform:rotateX(12deg);">
       {photos.map((photo, i) => {
-        const angle = (360 / photos.length) * i;
+        const angle = (360 / cardCount) * i;
         return (
           <div
             class="carousel-card"
             data-angle={angle}
             data-src={`/images/${photo.src}`}
             data-caption={photo.caption}
-            style={`transform: rotateY(${angle}deg) translateZ(600px);`}
+            style={`transform: rotateY(${angle}deg) translateZ(1200px);`}
           >
             <img
               src={`/images/${photo.src}`}
               alt={photo.caption}
               loading="lazy"
               onerror="this.parentElement.style.display='none'"
-              style={photo.coverFit ? 'object-fit: cover; width: 100%; height: 100%; object-position: center;' : ''}
+              style={photo.coverFit ? 'object-fit:cover;width:100%;height:100%;object-position:center;' : ''}
             />
             <div class="caption">{photo.caption}</div>
           </div>
@@ -69,6 +70,8 @@ const photos = [
   const lbImg = document.getElementById('lightbox-img') as HTMLImageElement;
   const lbCaption = document.getElementById('lightbox-caption');
   const lbClose = document.getElementById('lightbox-close');
+  const cards = document.querySelectorAll('.carousel-card');
+  const totalCards = cards.length;
 
   if (inner && wrap) {
     let currentAngle = 0;
@@ -77,7 +80,26 @@ const photos = [
     let startX = 0;
 
     function updateCarousel() {
-      inner.style.transform = `rotateY(${currentAngle}deg)`;
+      inner.style.transform = `rotateX(12deg) rotateY(${currentAngle}deg)`;
+
+      // Dynamic scale/opacity/shadow per card based on facing angle
+      cards.forEach((card, i) => {
+        const cardAngle = (360 / totalCards) * i;
+        let relAngle = ((currentAngle + cardAngle) % 360 + 360) % 360;
+        if (relAngle > 180) relAngle = 360 - relAngle;
+        // relAngle: 0 = front, 180 = back
+        const frontness = 1 - relAngle / 180;
+        const s = 0.55 + frontness * 0.45; // 0.55 → 1.0
+        const o = 0.5 + frontness * 0.5;   // 0.5 → 1.0
+        const el = card as HTMLElement;
+        el.style.opacity = String(o);
+        el.style.transform = `rotateY(${cardAngle}deg) translateZ(1200px) scale(${s})`;
+        if (frontness > 0.7) {
+          el.style.boxShadow = '0 20px 60px rgba(0,0,0,0.8), 0 0 30px rgba(90,186,50,0.3)';
+        } else {
+          el.style.boxShadow = '0 4px 20px rgba(0,0,0,0.2)';
+        }
+      });
     }
 
     wrap.addEventListener('wheel', (e) => {
@@ -99,14 +121,13 @@ const photos = [
       if (!isDragging && Math.abs(velocity) > 0.01) {
         currentAngle += velocity;
         velocity *= 0.95;
-        updateCarousel();
       }
+      updateCarousel();
     }
     animateCarousel();
-    updateCarousel();
   }
 
-  document.querySelectorAll('.carousel-card').forEach(card => {
+  cards.forEach(card => {
     card.addEventListener('click', () => {
       if (lbImg) lbImg.src = card.getAttribute('data-src') || '';
       if (lbCaption) lbCaption.textContent = card.getAttribute('data-caption') || '';

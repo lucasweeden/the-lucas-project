@@ -1,9 +1,8 @@
 ---
-// Change 3: LP logo cursor — runs globally via inline script
 ---
-<div id="lp-cursor-wrap" style="position:fixed;z-index:99999;pointer-events:none;top:0;left:0;">
-  <img src="/images/smallLucas_Project_Logo.png" id="lp-cursor-dot" style="position:absolute;width:36px;height:36px;border-radius:50%;transform:translate(-50%,-50%);pointer-events:none;" />
-  <div id="lp-cursor-ring" style="position:absolute;width:56px;height:56px;border:2px solid #5aba32;border-radius:50%;transform:translate(-50%,-50%);pointer-events:none;transition:width 0.2s ease,height 0.2s ease,border-color 0.2s ease;"></div>
+<!-- Change 1: LP logo INSIDE the circle ring, consolidated into one element -->
+<div id="lp-cursor" style="position:fixed;z-index:99999;pointer-events:none;width:56px;height:56px;border:2px solid #5aba32;border-radius:50%;transform:translate(-50%,-50%);transition:width 0.2s ease,height 0.2s ease,border-color 0.2s ease;">
+  <img src="/images/smallLucas_Project_Logo.png" alt="" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:32px;height:32px;border-radius:50%;pointer-events:none;transition:width 0.2s ease,height 0.2s ease;" id="lp-cursor-img" />
 </div>
 
 <style is:global>
@@ -13,37 +12,38 @@
 <script is:inline>
   (function() {
     if (window.matchMedia('(pointer: fine)').matches && window.innerWidth > 768) {
-      var dot = document.getElementById('lp-cursor-dot');
-      var ring = document.getElementById('lp-cursor-ring');
-      var mx = 0, my = 0, rx = 0, ry = 0;
+      var el = document.getElementById('lp-cursor');
+      var img = document.getElementById('lp-cursor-img');
+      var mx = 0, my = 0, cx = 0, cy = 0;
 
       document.addEventListener('mousemove', function(e) {
         mx = e.clientX; my = e.clientY;
-        if (dot) { dot.style.left = mx + 'px'; dot.style.top = my + 'px'; }
       });
 
-      var hoverSel = 'a, button, .carousel-card, .card, .social-card, .btn-ghost, .contact-email-btn';
+      var hoverSel = 'a, button, .carousel-card, .card, .social-card, .btn-ghost, .contact-email-btn, .footer-social-pill';
       document.addEventListener('mouseover', function(e) {
-        if (e.target && e.target.closest && e.target.closest(hoverSel) && ring) {
-          ring.style.width = '70px'; ring.style.height = '70px'; ring.style.borderColor = '#8cd867';
+        if (e.target && e.target.closest && e.target.closest(hoverSel) && el) {
+          el.style.width = '70px'; el.style.height = '70px'; el.style.borderColor = '#8cd867';
+          if (img) { img.style.width = '38px'; img.style.height = '38px'; }
         }
       });
       document.addEventListener('mouseout', function(e) {
-        if (e.target && e.target.closest && e.target.closest(hoverSel) && ring) {
-          ring.style.width = '56px'; ring.style.height = '56px'; ring.style.borderColor = '#5aba32';
+        if (e.target && e.target.closest && e.target.closest(hoverSel) && el) {
+          el.style.width = '56px'; el.style.height = '56px'; el.style.borderColor = '#5aba32';
+          if (img) { img.style.width = '32px'; img.style.height = '32px'; }
         }
       });
 
-      function animRing() {
-        rx += (mx - rx) * 0.12;
-        ry += (my - ry) * 0.12;
-        if (ring) { ring.style.left = rx + 'px'; ring.style.top = ry + 'px'; }
-        requestAnimationFrame(animRing);
+      function anim() {
+        cx += (mx - cx) * 0.12;
+        cy += (my - cy) * 0.12;
+        if (el) { el.style.left = cx + 'px'; el.style.top = cy + 'px'; }
+        requestAnimationFrame(anim);
       }
-      animRing();
+      anim();
     } else {
-      var wrap = document.getElementById('lp-cursor-wrap');
-      if (wrap) wrap.style.display = 'none';
+      var el = document.getElementById('lp-cursor');
+      if (el) el.style.display = 'none';
     }
   })();
 </script>

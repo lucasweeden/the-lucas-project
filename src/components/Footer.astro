@@ -31,7 +31,7 @@ const socials = [
 </div>
 
 <!-- Scroll-to-resources trap -->
-<div id="footer-scroll-trap" style="height:280vh;position:relative;z-index:2;">
+<div id="footer-scroll-trap" style="height:140vh;position:relative;z-index:2;">
   <div id="footer-trap-hint" style="position:sticky;top:50%;text-align:center;font-family:'Bebas Neue',sans-serif;font-size:18px;color:#5aba32;opacity:0;transition:opacity 0.5s ease;letter-spacing:2px;">Resources →</div>
 </div>
 <div id="footer-scroll-trap-end" style="height:1px;"></div>
@@ -111,7 +111,7 @@ const socials = [
   window.addEventListener('wheel', (e) => {
     if (sentinelVisible && e.deltaY > 0) {
       scrollCount++;
-      if (scrollCount >= 3) window.location.href = '/resources';
+      if (scrollCount >= 2) window.location.href = '/resources';
     }
   });
 
@@ -121,7 +121,7 @@ const socials = [
     const delta = touchStartY - e.changedTouches[0].clientY;
     if (sentinelVisible && delta > 30) {
       scrollCount++;
-      if (scrollCount >= 3) window.location.href = '/resources';
+      if (scrollCount >= 2) window.location.href = '/resources';
     }
   });
 </script>
