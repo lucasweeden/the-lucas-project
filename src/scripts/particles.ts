@@ -1,11 +1,11 @@
 // LP coins: 1500 desktop, 80 mobile, 225 tablet
 // Performance: batched creation, 30fps physics, viewport culling, mousemove throttle
 
-export function initFloatingCoins() {
+export function initFloatingCoins(scale = 1) {
   const device = document.documentElement.getAttribute('data-device') || 'desktop';
   const isMobile = device === 'mobile';
   const isTablet = device === 'tablet';
-  const count = isMobile ? 80 : (isTablet ? 225 : 1500);
+  const count = Math.round((isMobile ? 80 : (isTablet ? 225 : 1500)) * scale);
   const container = document.getElementById('lp-coin-bg');
   if (!container) return;
 
@@ -104,10 +104,10 @@ export function initFloatingCoins() {
 }
 
 // Stardust: 1000 desktop, 150 mobile (50% reduction)
-export function initStardust() {
+export function initStardust(scale = 1) {
   const device = document.documentElement.getAttribute('data-device') || 'desktop';
   const isMobile = device === 'mobile';
-  const particleCount = isMobile ? 150 : 1000;
+  const particleCount = Math.round((isMobile ? 150 : 1000) * scale);
 
   const canvas = document.createElement('canvas');
   canvas.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:1;pointer-events:none;will-change:contents;';
