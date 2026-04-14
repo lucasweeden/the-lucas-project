@@ -40,6 +40,17 @@ const timeline = [
   <div id="staircase-section" style="height:100vh;"></div>
   <canvas id="staircase-canvas" style="position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:500;display:none;opacity:0;"></canvas>
 
+  <!-- HTML overlay cards — centered in viewport when active -->
+  <div id="staircase-overlays" style="position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:501;pointer-events:none;display:none;">
+    {timeline.map((entry, i) => (
+      <div class="stair-overlay-card" id={`overlay-${i}`}>
+        <img src={`/images/${entry.photo}`} alt={entry.title} loading="lazy" onerror="this.style.display='none'" />
+        <div class="stair-overlay-title">{entry.title}</div>
+        <div class="stair-overlay-desc">{entry.text}</div>
+      </div>
+    ))}
+  </div>
+
   <div id="step-indicator" style="position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:502;font-family:'Syne',sans-serif;font-size:12px;letter-spacing:3px;color:#5aba32;display:none;text-transform:uppercase;">STEP 1 OF 8</div>
 
   <div class="mobile-timeline" id="mobile-timeline">
@@ -63,20 +74,9 @@ const timeline = [
   const mobileEl = document.getElementById('mobile-timeline');
   const stairSection = document.getElementById('staircase-section');
   const stairCanvas = document.getElementById('staircase-canvas') as HTMLCanvasElement;
+  const overlaysWrap = document.getElementById('staircase-overlays');
   const siteNav = document.getElementById('site-nav');
   const stepIndicator = document.getElementById('step-indicator');
-
-  // Timeline data for 3D text textures
-  const timelineData = [
-    { title: "BORN AGAINST THE ODDS", text: "Born Oceanside CA, moved to Texas at age 2", photo: '/images/IMG_2282.jpeg' },
-    { title: "THE EARLY HUSTLE", text: "Door-to-door sales at age 10, candy business making $1K+/week", photo: '/images/IMG_2829.jpeg' },
-    { title: "HIGH SCHOOL YEARS", text: "Football from ages 5-18, 6 concussions, discus record", photo: '/images/IMG_1218.PNG' },
-    { title: "THE LEAP AT 19", text: "Quit Dominos, joined Holden Roofing. $450K first month — record still unbroken", photo: '/images/IMG_1426.jpeg' },
-    { title: "BUILDING THE CAREER", text: "$10M+ total career sales, co-founded Screaming Eagle, Priority Roofing MVP", photo: '/images/FullSizeRender.jpg' },
-    { title: "THE CRASH", text: "Dirt bike accident. ACL, MCL, LCL, meniscus — wheelchair", photo: '/images/IMG_5426.jpeg' },
-    { title: "THE PIVOT", text: "Forced into AI, found Chase, built Limitless Roofing Solutions", photo: '/images/IMG_1770.jpeg' },
-    { title: "RIGHT NOW", text: "Building in public, documenting the climb", photo: '/images/IMG_4848.jpeg' },
-  ];
 
   if (isMobile) {
     if (stairSection) stairSection.style.display = 'none';
@@ -92,6 +92,7 @@ const timeline = [
       const blendObs = new IntersectionObserver((entries) => {
         if (entries[0].isIntersecting) {
           stairCanvas.style.display = 'block';
+          if (overlaysWrap) overlaysWrap.style.display = 'block';
           gsap.to(stairCanvas, { opacity: 1, duration: 2.5, ease: 'power1.inOut' });
           gsap.to('#about-content-wrapper', { opacity: 0, duration: 1.8, ease: 'power1.in', delay: 0.4 });
           blendObs.disconnect();
@@ -178,51 +179,12 @@ const timeline = [
       dg.setAttribute('position', new THREE.BufferAttribute(dp, 3));
       scene.add(new THREE.Points(dg, new THREE.PointsMaterial({ color: 0x5aba32, size: 0.03, transparent: true, opacity: 0.3, sizeAttenuation: true })));
 
-      // --- HELPER: Create canvas texture with title + description ---
-      function createTextTexture(title: string, desc: string): THREE.CanvasTexture {
-        const canvas = document.createElement('canvas');
-        canvas.width = 512;
-        canvas.height = 256;
-        const ctx = canvas.getContext('2d')!;
-        // Black background
-        ctx.fillStyle = '#000000';
-        ctx.fillRect(0, 0, 512, 256);
-        // Title — green
-        ctx.font = 'bold 32px Arial, Helvetica, sans-serif';
-        ctx.fillStyle = '#8cd867';
-        ctx.textBaseline = 'top';
-        ctx.fillText(title, 20, 20, 472);
-        // Description — sage, word-wrapped
-        ctx.font = '18px Arial, Helvetica, sans-serif';
-        ctx.fillStyle = '#a8d890';
-        const words = desc.split(' ');
-        let line = '';
-        let y = 70;
-        for (const word of words) {
-          const test = line + word + ' ';
-          if (ctx.measureText(test).width > 472 && line.length > 0) {
-            ctx.fillText(line.trim(), 20, y);
-            line = word + ' ';
-            y += 26;
-          } else {
-            line = test;
-          }
-        }
-        if (line.trim()) ctx.fillText(line.trim(), 20, y);
-        // Green border accent
-        ctx.strokeStyle = '#3a7a2a';
-        ctx.lineWidth = 3;
-        ctx.strokeRect(1, 1, 510, 254);
-
-        const tex = new THREE.CanvasTexture(canvas);
-        tex.colorSpace = THREE.SRGBColorSpace;
-        return tex;
-      }
-
-      // --- STEPS + PHOTO CARDS (3D planes on treads with depth occlusion) ---
+      // --- STEPS + PHOTO CARDS ---
       const treadMat = new THREE.MeshStandardMaterial({ color: 0x0d2006, roughness: 0.8 });
       const riserMat = new THREE.MeshStandardMaterial({ color: 0x071204, roughness: 0.9 });
-      const loader = new THREE.TextureLoader();
+
+      // Store 3D anchor points for each step so HTML overlays can track them
+      const stepAnchors: THREE.Vector3[] = [];
 
       for (let i = 0; i < STEPS; i++) {
         const ang = i * (STEP_TURN * Math.PI / 180);
@@ -230,84 +192,27 @@ const timeline = [
         const cy = -i * STEP_DROP;
         const cz = Math.sin(ang) * STAIR_R * 0.55;
 
-        // Tread — thicker for better occlusion
-        const tread = new THREE.Mesh(new THREE.BoxGeometry(STEP_W, STEP_H * 2, STEP_D), treadMat);
+        // Tread
+        const tread = new THREE.Mesh(new THREE.BoxGeometry(STEP_W, STEP_H, STEP_D), treadMat);
         tread.position.set(cx, cy, cz);
         tread.rotation.y = -ang;
         tread.receiveShadow = true;
         scene.add(tread);
 
-        // Riser — FULL height between steps for solid occlusion (no see-through)
-        const riserH = STEP_DROP;
-        const riser = new THREE.Mesh(new THREE.BoxGeometry(STEP_W, riserH, 0.12), riserMat);
-        riser.position.set(cx, cy - riserH / 2, cz);
+        // Riser
+        const riser = new THREE.Mesh(new THREE.BoxGeometry(STEP_W, STEP_DROP * 0.6, 0.08), riserMat);
+        riser.position.set(cx, cy - STEP_DROP * 0.3, cz);
         riser.rotation.y = -ang;
         scene.add(riser);
 
-        // Solid underside fill — blocks light/view from below
-        const underside = new THREE.Mesh(
-          new THREE.BoxGeometry(STEP_W, 0.08, STEP_D),
-          riserMat
-        );
-        underside.position.set(cx, cy - STEP_H, cz);
-        underside.rotation.y = -ang;
-        scene.add(underside);
-
         // Green edge glow
-        const glow = new THREE.Mesh(
-          new THREE.BoxGeometry(STEP_W, 0.02, 0.02),
-          new THREE.MeshBasicMaterial({ color: 0x3a7a2a, transparent: true, opacity: 0.6 })
-        );
-        glow.position.set(cx, cy + STEP_H, cz);
+        const glow = new THREE.Mesh(new THREE.BoxGeometry(STEP_W, 0.015, 0.015), new THREE.MeshBasicMaterial({ color: 0x3a7a2a, transparent: true, opacity: 0.5 }));
+        glow.position.set(cx, cy + STEP_H / 2, cz);
         glow.rotation.y = -ang;
         scene.add(glow);
 
-        // --- PHOTO PLANE: laid flat on top of the tread, filling the step ---
-        // Photo covers the back ~65% of the step depth
-        const photoW = STEP_W * 0.9; // nearly full step width
-        const photoD = STEP_D * 0.6; // back portion of step
-        const photoGeo = new THREE.PlaneGeometry(photoW, photoD);
-        const photoMat = new THREE.MeshBasicMaterial({
-          color: 0xffffff, // NO tint — true colors
-          side: THREE.FrontSide,
-        });
-        const photoMesh = new THREE.Mesh(photoGeo, photoMat);
-        // Rotate to lie flat (face up), then match step rotation
-        photoMesh.rotation.x = -Math.PI / 2;
-        photoMesh.rotation.z = ang; // counter the step's y-rotation since plane rotates on z when flat
-        photoMesh.position.set(cx, cy + STEP_H + 0.02, cz);
-        // Offset toward back of step
-        const backOffset = STEP_D * 0.15;
-        photoMesh.position.x -= Math.sin(ang) * backOffset;
-        photoMesh.position.z += Math.cos(ang) * backOffset;
-        scene.add(photoMesh);
-
-        // Load photo texture
-        loader.load(timelineData[i].photo, (tex) => {
-          tex.colorSpace = THREE.SRGBColorSpace;
-          photoMat.map = tex;
-          photoMat.needsUpdate = true;
-        });
-
-        // --- TEXT PLANE: laid flat on front portion of the step ---
-        const textW = STEP_W * 0.9;
-        const textD = STEP_D * 0.35;
-        const textGeo = new THREE.PlaneGeometry(textW, textD);
-        const textTex = createTextTexture(timelineData[i].title, timelineData[i].text);
-        const textMat = new THREE.MeshBasicMaterial({
-          map: textTex,
-          color: 0xffffff,
-          side: THREE.FrontSide,
-        });
-        const textMesh = new THREE.Mesh(textGeo, textMat);
-        textMesh.rotation.x = -Math.PI / 2;
-        textMesh.rotation.z = ang;
-        textMesh.position.set(cx, cy + STEP_H + 0.02, cz);
-        // Offset toward front of step
-        const frontOffset = STEP_D * 0.3;
-        textMesh.position.x += Math.sin(ang) * frontOffset;
-        textMesh.position.z -= Math.cos(ang) * frontOffset;
-        scene.add(textMesh);
+        // Anchor point slightly above the step surface for overlay projection
+        stepAnchors.push(new THREE.Vector3(cx, cy + 0.6, cz));
       }
 
       // --- CAMERA PATH (EDIT 4B: centered above, looking down, spiral descent) ---
@@ -346,6 +251,42 @@ const timeline = [
           light.intensity = dist < 0.15 ? 1.8 - dist * 8 : 0.3;
         });
 
+        // Project HTML overlay cards onto their step's screen position
+        // Cards move in sync with the 3D staircase as it scrolls
+        const overlayCards = document.querySelectorAll('.stair-overlay-card');
+        const halfW = window.innerWidth / 2;
+        const halfH = window.innerHeight / 2;
+
+        overlayCards.forEach((card, i) => {
+          const el = card as HTMLElement;
+          const anchor = stepAnchors[i].clone();
+
+          // Project 3D world position → 2D screen coordinates
+          anchor.project(camera);
+          const screenX = (anchor.x * halfW) + halfW;
+          const screenY = -(anchor.y * halfH) + halfH;
+
+          // Check if the step is in front of the camera (z < 1 in NDC)
+          const isBehindCamera = anchor.z > 1;
+          // Check if reasonably on screen
+          const isOnScreen = screenX > -200 && screenX < window.innerWidth + 200
+                          && screenY > -300 && screenY < window.innerHeight + 300;
+
+          if (!isBehindCamera && isOnScreen) {
+            // Fade based on distance from camera's current step position
+            const stepT = i / STEPS;
+            const dist = Math.abs(t - stepT);
+            const fadeIn = dist < 0.15 ? Math.max(0, 1 - (dist / 0.15)) : 0;
+
+            el.style.left = `${screenX}px`;
+            el.style.top = `${screenY}px`;
+            el.style.opacity = String(fadeIn);
+            el.style.transform = 'translate(-50%, -50%)';
+          } else {
+            el.style.opacity = '0';
+          }
+        });
+
         const stepNum = Math.min(Math.floor(t * STEPS) + 1, STEPS);
         if (stepIndicator) stepIndicator.textContent = `STEP ${stepNum} OF ${STEPS}`;
 
@@ -361,21 +302,25 @@ const timeline = [
         scrub: 1.2,
         onEnter: () => {
           stairCanvas.style.display = 'block';
+          if (overlaysWrap) overlaysWrap.style.display = 'block';
           if (stepIndicator) stepIndicator.style.display = 'block';
           if (siteNav) { siteNav.style.opacity = '0'; siteNav.style.pointerEvents = 'none'; }
         },
         onLeave: () => {
           stairCanvas.style.display = 'none';
+          if (overlaysWrap) overlaysWrap.style.display = 'none';
           if (stepIndicator) stepIndicator.style.display = 'none';
           if (siteNav) { siteNav.style.opacity = '1'; siteNav.style.pointerEvents = 'auto'; }
         },
         onEnterBack: () => {
           stairCanvas.style.display = 'block';
+          if (overlaysWrap) overlaysWrap.style.display = 'block';
           if (stepIndicator) stepIndicator.style.display = 'block';
           if (siteNav) { siteNav.style.opacity = '0'; siteNav.style.pointerEvents = 'none'; }
         },
         onLeaveBack: () => {
           stairCanvas.style.display = 'none';
+          if (overlaysWrap) overlaysWrap.style.display = 'none';
           if (stepIndicator) stepIndicator.style.display = 'none';
           if (siteNav) { siteNav.style.opacity = '1'; siteNav.style.pointerEvents = 'auto'; }
         },
@@ -404,6 +349,37 @@ const timeline = [
 </script>
 
 <style>
+  .stair-overlay-card {
+    position: absolute;
+    left: 0; top: 0;
+    transform: translate(-50%, -50%);
+    width: 340px;
+    background: rgba(0, 0, 0, 0.88);
+    border: 1px solid rgba(90, 186, 50, 0.4);
+    border-radius: 12px;
+    padding: 16px;
+    opacity: 0;
+    /* No CSS transition on left/top — JS sets position every frame for sync with 3D */
+    transition: opacity 0.25s ease;
+    pointer-events: none;
+    will-change: left, top, opacity;
+  }
+  .stair-overlay-card img {
+    width: 100%; height: 200px; object-fit: cover;
+    border-radius: 8px; margin-bottom: 12px; display: block;
+  }
+  .stair-overlay-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px; color: #8cd867;
+    text-transform: uppercase; letter-spacing: 0.04em;
+    margin-bottom: 6px;
+    background: rgba(0,0,0,0.85);
+    display: inline-block; padding: 2px 12px; border-radius: 4px;
+  }
+  .stair-overlay-desc {
+    font-size: 15px; line-height: 1.5;
+    color: #a8d890; opacity: 0.9;
+  }
   .mobile-timeline { display: none; }
   .mobile-step {
     border-left: 3px solid #3a7a2a; padding-left: 16px;
@@ -415,5 +391,6 @@ const timeline = [
   @media (max-width: 768px) {
     #staircase-section { display: none !important; }
     .mobile-timeline { display: block !important; }
+    .stair-overlay-card { width: 280px; }
   }
 </style>
