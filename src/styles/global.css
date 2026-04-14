@@ -879,9 +879,10 @@ img:not([src]) { display: none; }
 [data-device="mobile"] .card-body,
 [data-device="mobile"] .spiral-text,
 [data-device="mobile"] .mobile-step p { font-size: 14px !important; min-font-size: 14px; }
-[data-device="mobile"] .carousel-scene { height: 360px !important; padding-top: 24px !important; }
-[data-device="mobile"] .carousel-container { width: 140px !important; height: 220px !important; }
-[data-device="mobile"] .carousel-card { width: 140px !important; height: 220px !important; }
+/* Mobile carousel: flat horizontal scroll — no fixed height, no forced dimensions */
+[data-device="mobile"] .carousel-scene { height: auto !important; min-height: 340px; padding-top: 0 !important; }
+[data-device="mobile"] .carousel-container { width: max-content !important; height: auto !important; }
+[data-device="mobile"] .carousel-card { width: 220px !important; height: 320px !important; }
 [data-device="mobile"] .pull-quote { font-size: 20px !important; }
 [data-device="mobile"] .lightbox img { max-width: 95vw; max-height: 70vh; }
 [data-device="mobile"] .res-card { padding: 16px !important; }
@@ -890,6 +891,9 @@ img:not([src]) { display: none; }
 [data-device="mobile"] .equal-cards { grid-template-columns: 1fr !important; }
 [data-device="mobile"] .eq-card { min-height: auto !important; }
 [data-device="mobile"] #step-indicator { display: none !important; }
+[data-device="mobile"] .carousel-scene::-webkit-scrollbar { display: none; }
+[data-device="mobile"] .carousel-scene { -ms-overflow-style: none; scrollbar-width: none; scroll-snap-type: x mandatory; }
+[data-device="mobile"] .carousel-card { scroll-snap-align: center; }
 
 /* Tablet */
 [data-device="tablet"] .three-col,

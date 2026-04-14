@@ -63,7 +63,7 @@ function getCardAngle(idx: number): number {
           <div class={`carousel-card ${photo.isGameDay ? 'game-day-card' : ''}`}
             data-index={i} data-src={`/images/${photo.src}`} data-caption={photo.caption}
             style={`transform: rotateY(${angle}deg) translateZ(${radius}px);`}>
-            <img src={`/images/${photo.src}`} alt={photo.caption} loading="eager" decoding="async" onerror="this.parentElement.style.display='none'" />
+            <img src={`/images/${photo.src}`} alt={photo.caption} loading="eager" decoding="async" />
             <div class="card-title">{photo.caption}</div>
           </div>
         );
@@ -161,9 +161,34 @@ function getCardAngle(idx: number): number {
   const total = cards.length;
   const R = 900;
   const GD_I = 13;
-  const CL_I = 12; // Camp Life — left neighbor of Game Day
+  const CL_I = 12;
   const NORMAL_A = 17.775;
-  const GD_ADJ_A = 20.025; // equal extra gap on both sides of Game Day
+  const GD_ADJ_A = 20.025;
+
+  const isMobileCarousel = window.innerWidth <= 768 || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+  // === FORCE LOAD ALL IMAGES ===
+  // On mobile, browsers skip loading images in 3D-transformed containers.
+  // Force every carousel image to load by creating hidden Image() objects,
+  // then swap src to trigger browser cache hit on the real <img>.
+  function forceLoadAllImages() {
+    cards.forEach((card) => {
+      const img = card.querySelector('img') as HTMLImageElement;
+      if (!img || img.complete) return;
+      const loader = new Image();
+      loader.src = img.src;
+      loader.onload = () => {
+        // Re-assign src to trigger render from cache
+        const src = img.src;
+        img.src = '';
+        img.src = src;
+      };
+    });
+  }
+  // Run immediately and also after a short delay (for slow connections)
+  forceLoadAllImages();
+  setTimeout(forceLoadAllImages, 1500);
+  setTimeout(forceLoadAllImages, 4000);
 
   if (container && sceneEl) {
     let rotation = 0, velocity = 0, isDragging = false, lastX = 0;
@@ -176,39 +201,89 @@ function getCardAngle(idx: number): number {
       return angle;
     }
 
-    function updateCards() {
-      cards.forEach((card, i) => {
-        const cardAngle = getAngle(i);
-        let diff = ((cardAngle + rotation) % 360 + 360) % 360;
-        if (diff > 180) diff = 360 - diff;
-        const t = diff / 180;
-        const scale = 1.0 - t * 0.45;
-        const opacity = 1.0 - t * 0.6;
-        const brightness = 1.0 - t * 0.5;
+    if (isMobileCarousel) {
+      // === MOBILE: Flat horizontal scroll carousel ===
+      // Disable 3D transforms entirely — they cause image loading failures on mobile.
+      container.style.transform = 'none';
+      container.style.transformStyle = 'flat';
+      container.style.display = 'flex';
+      container.style.gap = '16px';
+      container.style.width = 'max-content';
+      container.style.height = 'auto';
+      container.style.position = 'relative';
+
+      sceneEl.style.perspective = 'none';
+      sceneEl.style.overflow = 'auto';
+      sceneEl.style.overflowX = 'auto';
+      sceneEl.style.overflowY = 'hidden';
+      sceneEl.style.WebkitOverflowScrolling = 'touch';
+      sceneEl.style.display = 'block';
+      sceneEl.style.height = 'auto';
+      sceneEl.style.padding = '20px 16px';
+
+      cards.forEach((card) => {
         const el = card as HTMLElement;
-        el.style.transform = `rotateY(${cardAngle}deg) translateZ(${R}px) scale(${scale})`;
-        el.style.opacity = String(opacity);
-        el.style.filter = `brightness(${brightness})`;
+        // Reset all 3D transforms — render flat
+        el.style.transform = 'none';
+        el.style.position = 'relative';
+        el.style.left = 'auto';
+        el.style.top = 'auto';
+        el.style.marginLeft = '0';
+        el.style.marginTop = '0';
+        el.style.opacity = '1';
+        el.style.filter = 'none';
+        el.style.flexShrink = '0';
+        el.style.width = '220px';
+        el.style.height = '320px';
+
+        if (el.classList.contains('game-day-card')) {
+          el.style.width = '320px';
+          el.style.height = '220px';
+        }
       });
-    }
 
-    sceneEl.addEventListener('wheel', (e) => { e.preventDefault(); velocity += e.deltaY * 0.3; }, { passive: false });
-    sceneEl.addEventListener('mousedown', (e) => { isDragging = true; lastX = e.clientX; });
-    window.addEventListener('mousemove', (e) => { if (!isDragging) return; velocity += (e.clientX - lastX) * 0.8; lastX = e.clientX; }, { passive: true });
-    window.addEventListener('mouseup', () => { isDragging = false; });
-    sceneEl.addEventListener('touchstart', (e) => { lastX = e.touches[0].clientX; }, { passive: true });
-    sceneEl.addEventListener('touchmove', (e) => { velocity += (e.touches[0].clientX - lastX) * 0.8; lastX = e.touches[0].clientX; }, { passive: true });
+      // Auto-scroll to center on load
+      setTimeout(() => {
+        sceneEl.scrollLeft = (sceneEl.scrollWidth - sceneEl.clientWidth) / 2;
+      }, 100);
 
-    function loop() {
-      velocity *= 0.94;
-      rotation += velocity * 0.01;
-      container.style.transform = `rotateX(8deg) rotateY(${rotation}deg)`;
-      updateCards();
-      requestAnimationFrame(loop);
+    } else {
+      // === DESKTOP: Original 3D rotating carousel ===
+      function updateCards() {
+        cards.forEach((card, i) => {
+          const cardAngle = getAngle(i);
+          let diff = ((cardAngle + rotation) % 360 + 360) % 360;
+          if (diff > 180) diff = 360 - diff;
+          const t = diff / 180;
+          const scale = 1.0 - t * 0.45;
+          const opacity = 1.0 - t * 0.6;
+          const brightness = 1.0 - t * 0.5;
+          const el = card as HTMLElement;
+          el.style.transform = `rotateY(${cardAngle}deg) translateZ(${R}px) scale(${scale})`;
+          el.style.opacity = String(opacity);
+          el.style.filter = `brightness(${brightness})`;
+        });
+      }
+
+      sceneEl.addEventListener('wheel', (e) => { e.preventDefault(); velocity += e.deltaY * 0.3; }, { passive: false });
+      sceneEl.addEventListener('mousedown', (e) => { isDragging = true; lastX = e.clientX; });
+      window.addEventListener('mousemove', (e) => { if (!isDragging) return; velocity += (e.clientX - lastX) * 0.8; lastX = e.clientX; }, { passive: true });
+      window.addEventListener('mouseup', () => { isDragging = false; });
+      sceneEl.addEventListener('touchstart', (e) => { lastX = e.touches[0].clientX; }, { passive: true });
+      sceneEl.addEventListener('touchmove', (e) => { velocity += (e.touches[0].clientX - lastX) * 0.8; lastX = e.touches[0].clientX; }, { passive: true });
+
+      function loop() {
+        velocity *= 0.94;
+        rotation += velocity * 0.01;
+        container.style.transform = `rotateX(8deg) rotateY(${rotation}deg)`;
+        updateCards();
+        requestAnimationFrame(loop);
+      }
+      loop();
     }
-    loop();
   }
 
+  // Lightbox — works on both mobile and desktop
   cards.forEach(card => {
     card.addEventListener('click', () => {
       if (lbImg) lbImg.src = card.getAttribute('data-src') || '';
