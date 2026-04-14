@@ -164,7 +164,7 @@ const timeline = [
 
       for (let i = 0; i <= STEP_COUNT * 20; i++) {
         const t = i / (STEP_COUNT * 20);
-        const angle = t * STEP_COUNT * (STEP_ANGLE * Math.PI / 180);
+        const angle = -t * STEP_COUNT * (STEP_ANGLE * Math.PI / 180);
         const y = 5.5 - t * (STEP_COUNT * STEP_HEIGHT + 2.5);
         const wr = SPIRAL_RADIUS * 0.42;
         cameraPathPoints.push(new THREE.Vector3(Math.cos(angle) * wr, y, Math.sin(angle) * wr));

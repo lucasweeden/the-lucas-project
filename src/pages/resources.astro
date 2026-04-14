@@ -54,7 +54,7 @@ const socials = [
         </div>
 
         <!-- Clickable resource cards (Change 5) -->
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px;max-width:800px;margin:0 auto 48px;text-align:left;">
+        <div class="res-cards-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px;max-width:800px;margin:0 auto 48px;text-align:left;">
           <div class="card res-card" data-subject="Collab Inquiry" style="padding:24px;transition:border-color 0.2s ease,transform 0.2s ease;">
             <div class="card-title" style="font-size:20px;">Collabs</div>
             <div class="card-body">Open to brand collaborations and partnerships.</div>
@@ -119,7 +119,10 @@ const socials = [
   .social-card-big[data-anim="glow"] { animation:socGlow 2s ease-in-out infinite; }
   .social-card-big { animation-play-state:paused; }
   .social-card-big.anim-active { animation-play-state:running; }
-  @media (max-width:768px) { .social-grid-big { grid-template-columns:repeat(2,1fr); } }
+  @media (max-width:768px) {
+    .social-grid-big { grid-template-columns:repeat(2,1fr); }
+    .res-cards-grid { grid-template-columns: 1fr !important; }
+  }
   @media (max-width:480px) { .social-grid-big { grid-template-columns:1fr; } }
 </style>
 

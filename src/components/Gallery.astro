@@ -25,12 +25,12 @@ const count = photos.length;
 const radius = 900;
 ---
 <section class="site-section" id="gallery">
-  <div class="section-inner">
+  <div class="section-inner" style="margin-bottom: 64px;">
     <div class="section-label">02 — The Life</div>
     <h2 class="section-title">LIVING WIDE OPEN</h2>
     <p class="section-subtitle">No filter. No highlight reel. Just the climb.</p>
   </div>
-  <div class="carousel-scene" id="carousel-scene">
+  <div class="carousel-scene" id="carousel-scene" style="padding-top: 48px;">
     <div class="carousel-container" id="photoCarousel">
       {photos.map((photo, i) => {
         const angle = (360 / count) * i;
@@ -76,7 +76,7 @@ const radius = 900;
   .carousel-card img {
     width: 100%; height: 80%; object-fit: cover; object-position: center top; display: block;
   }
-  .game-day-card img { object-position: center 30%; }
+  .game-day-card img { object-position: center 15%; }
   .card-title {
     height: 20%; display: flex; align-items: center; justify-content: center;
     background: rgba(6,13,4,0.9); color: #8cd867;

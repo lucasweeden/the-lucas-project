@@ -110,7 +110,7 @@ export function initFloatingCoins() {
 export function initStardust() {
   const device = document.documentElement.getAttribute('data-device') || 'desktop';
   const isMobile = device === 'mobile';
-  const particleCount = isMobile ? 600 : 2000;
+  const particleCount = isMobile ? 300 : 2000;
 
   const canvas = document.createElement('canvas');
   canvas.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:2;pointer-events:none;will-change:transform;';
