@@ -311,18 +311,24 @@ const timeline = [
           if (overlaysWrap) overlaysWrap.style.display = 'none';
           if (stepIndicator) stepIndicator.style.display = 'none';
           if (siteNav) { siteNav.style.opacity = '1'; siteNav.style.pointerEvents = 'auto'; }
+          // Restore About section visibility when scrolling past staircase
+          gsap.to('#about-content-wrapper', { opacity: 1, duration: 0.5, ease: 'power1.out' });
         },
         onEnterBack: () => {
           stairCanvas.style.display = 'block';
           if (overlaysWrap) overlaysWrap.style.display = 'block';
           if (stepIndicator) stepIndicator.style.display = 'block';
           if (siteNav) { siteNav.style.opacity = '0'; siteNav.style.pointerEvents = 'none'; }
+          // Hide About section again when re-entering staircase from below
+          gsap.to('#about-content-wrapper', { opacity: 0, duration: 0.5, ease: 'power1.in' });
         },
         onLeaveBack: () => {
           stairCanvas.style.display = 'none';
           if (overlaysWrap) overlaysWrap.style.display = 'none';
           if (stepIndicator) stepIndicator.style.display = 'none';
           if (siteNav) { siteNav.style.opacity = '1'; siteNav.style.pointerEvents = 'auto'; }
+          // Restore About section visibility when scrolling back up
+          gsap.to('#about-content-wrapper', { opacity: 1, duration: 0.5, ease: 'power1.out' });
         },
         onUpdate: (self) => { scrollData.progress = self.progress; }
       });
