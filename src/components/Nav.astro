@@ -1,5 +1,6 @@
 ---
 const links = [
+  { href: "/", label: "Home", isHome: true },
   { href: "#about", label: "About" },
   { href: "#building", label: "Work" },
   { href: "#story", label: "Story" },
@@ -17,9 +18,9 @@ const links = [
   <div class="nav-center">
     {links.map((l) => (
       <div class="nav-pill">
-        <a href={l.href} class="nav-pill-inner">
-          <span class="nav-pill-front">{l.label}</span>
-          <span class="nav-pill-back">{l.label}</span>
+        <a href={l.href} class={`nav-pill-inner ${l.isHome ? 'nav-pill-home' : ''}`}>
+          <span class={`nav-pill-front ${l.isHome ? 'nav-home-front' : ''}`}>{l.label}</span>
+          <span class={`nav-pill-back ${l.isHome ? 'nav-home-back' : ''}`}>{l.label}</span>
         </a>
       </div>
     ))}
@@ -37,17 +38,19 @@ const links = [
   ))}
 </div>
 
+<style>
+  .nav-home-front { background: #3a7a2a !important; color: #e8f5e0 !important; border-color: #3a7a2a !important; }
+  .nav-home-back { background: #2d8a22 !important; }
+</style>
+
 <script>
   const nav = document.getElementById('site-nav');
   const hamburger = document.getElementById('hamburger');
   const mobileNav = document.getElementById('mobile-nav');
 
   window.addEventListener('scroll', () => {
-    if (window.scrollY > window.innerHeight * 0.8) {
-      nav?.classList.add('scrolled');
-    } else {
-      nav?.classList.remove('scrolled');
-    }
+    if (window.scrollY > window.innerHeight * 0.8) nav?.classList.add('scrolled');
+    else nav?.classList.remove('scrolled');
   });
 
   hamburger?.addEventListener('click', () => {

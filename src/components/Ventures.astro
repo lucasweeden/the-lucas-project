@@ -23,13 +23,10 @@
         <div class="card-body">The hub. Documenting the build in public across YouTube, Instagram, and TikTok. All roads lead here.</div>
         <span class="card-badge green">Active</span>
       </div>
-      <!-- Change 6: SDE hidden until hover -->
-      <div class="card tilt-card sde-card" style="position:relative;overflow:hidden;">
+      <!-- SDE with scratch-to-reveal -->
+      <div class="card tilt-card" style="position:relative;overflow:hidden;" id="sde-card-wrap">
         <div class="sde-coming-soon">COMING SOON</div>
-        <div class="sde-overlay" id="sde-overlay">
-          <div style="opacity:0.08;"><img src="/images/sde-logo.png" alt="" style="filter:invert(1);width:60px;height:60px;margin:0 auto;" /></div>
-          <div style="color:#3a7a2a;opacity:0.2;font-family:'Bebas Neue',sans-serif;font-size:32px;margin-top:16px;">???</div>
-        </div>
+        <canvas id="sde-scratch" style="position:absolute;top:0;left:0;width:100%;height:100%;z-index:10;border-radius:16px;"></canvas>
         <div style="display:inline-block;background:#000;border-radius:10px;padding:10px;margin-bottom:16px;">
           <img src="/images/sde-logo.png" alt="Scurvy Dog Empire" style="filter:invert(1);width:60px;height:60px;object-fit:contain;display:block;" />
         </div>
@@ -42,19 +39,80 @@
 </section>
 
 <style>
-  .sde-card { position: relative; }
   .sde-coming-soon {
     position: absolute; top: -18px; left: 50%; transform: translateX(-50%);
     font-family: 'Syne', sans-serif; font-size: 10px; letter-spacing: 3px;
-    color: rgba(140,216,103,0.4); z-index: 6; white-space: nowrap;
+    color: rgba(140,216,103,0.35); z-index: 15; white-space: nowrap;
   }
-  .sde-overlay {
-    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-    z-index: 5; background: #060d04;
-    border: 1px solid rgba(58,122,42,0.2); border-radius: 16px;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    opacity: 1; transition: opacity 400ms ease;
-  }
-  .sde-card:hover .sde-overlay { opacity: 0; }
-  .sde-card:hover { box-shadow: 0 0 40px rgba(90,186,50,0.4); }
 </style>
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+  gsap.registerPlugin(ScrollTrigger);
+
+  const sdeWrap = document.getElementById('sde-card-wrap');
+  const sdeScratch = document.getElementById('sde-scratch') as HTMLCanvasElement;
+
+  if (sdeWrap && sdeScratch) {
+    let sdeRevealed = false;
+
+    function setupSdeScratch() {
+      if (sdeRevealed) return;
+      const rect = sdeWrap.getBoundingClientRect();
+      const w = rect.width, h = rect.height;
+      sdeScratch.width = w; sdeScratch.height = h;
+      sdeScratch.style.display = 'block';
+
+      const ctx = sdeScratch.getContext('2d');
+      if (!ctx) return;
+
+      ctx.fillStyle = '#0a1a05';
+      ctx.fillRect(0, 0, w, h);
+      ctx.strokeStyle = 'rgba(58,122,42,0.1)';
+      ctx.lineWidth = 1;
+      for (let i = -h; i < w + h; i += 16) {
+        ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i - h, h); ctx.stroke();
+      }
+      ctx.strokeStyle = '#3a7a2a'; ctx.lineWidth = 2;
+      ctx.strokeRect(1, 1, w - 2, h - 2);
+
+      ctx.fillStyle = '#5aba32';
+      ctx.font = "bold 32px 'Bebas Neue', Impact, sans-serif";
+      ctx.textAlign = 'center';
+      ctx.fillText('DRAG TO REVEAL', w / 2, h * 0.42);
+      ctx.fillStyle = 'rgba(140,216,103,0.6)';
+      ctx.font = "13px 'Syne', sans-serif";
+      ctx.fillText('scratch to uncover', w / 2, h * 0.56);
+
+      function erase(e: MouseEvent | TouchEvent) {
+        if (sdeRevealed) return;
+        const cr = sdeScratch.getBoundingClientRect();
+        let x: number, y: number;
+        if ('touches' in e) { x = e.touches[0].clientX - cr.left; y = e.touches[0].clientY - cr.top; }
+        else { x = e.clientX - cr.left; y = e.clientY - cr.top; }
+        ctx.globalCompositeOperation = 'destination-out';
+        ctx.beginPath(); ctx.arc(x, y, 35, 0, Math.PI * 2); ctx.fill();
+        ctx.globalCompositeOperation = 'source-over';
+      }
+      sdeScratch.addEventListener('mousemove', erase);
+      sdeScratch.addEventListener('touchmove', erase, { passive: true });
+
+      const check = setInterval(() => {
+        if (sdeRevealed) { clearInterval(check); return; }
+        const d = ctx.getImageData(0, 0, w, h);
+        let t = 0;
+        for (let i = 3; i < d.data.length; i += 16) { if (d.data[i] === 0) t++; }
+        if (t / Math.ceil(d.data.length / 16) > 0.55) {
+          sdeRevealed = true; clearInterval(check);
+          gsap.to(sdeScratch, { opacity: 0, duration: 0.5, onComplete: () => sdeScratch.remove() });
+        }
+      }, 200);
+    }
+
+    ScrollTrigger.create({
+      trigger: sdeWrap, start: 'top 80%',
+      onEnter: () => setupSdeScratch(),
+    });
+  }
+</script>

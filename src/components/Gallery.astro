@@ -1,5 +1,4 @@
 ---
-// Change 4: Rebuilt CSS 3D carousel from scratch
 const photos = [
   { src: "IMG_4863.jpeg", caption: "Golden Hour" },
   { src: "IMG_1530.jpeg", caption: "Powder Days" },
@@ -14,7 +13,7 @@ const photos = [
   { src: "IMG_2720.jpeg", caption: "Road Trip" },
   { src: "IMG_4848.jpeg", caption: "Pack Walk" },
   { src: "IMG_0856.jpeg", caption: "Camp Life" },
-  { src: "IMG_1218.PNG", caption: "Game Day" },
+  { src: "IMG_1218.PNG", caption: "Game Day", isGameDay: true },
   { src: "IMG_2829.jpeg", caption: "Great Grandpa Harold" },
   { src: "IMG_0045.jpeg", caption: "Dog Run" },
   { src: "IMG_5426.jpeg", caption: "Sand Dunes" },
@@ -23,7 +22,7 @@ const photos = [
   { src: "IMG_1426.jpeg", caption: "Family" },
 ];
 const count = photos.length;
-const radius = 520;
+const radius = 900;
 ---
 <section class="site-section" id="gallery">
   <div class="section-inner">
@@ -36,7 +35,8 @@ const radius = 520;
       {photos.map((photo, i) => {
         const angle = (360 / count) * i;
         return (
-          <div class="carousel-card" data-index={i} data-src={`/images/${photo.src}`} data-caption={photo.caption}
+          <div class={`carousel-card ${photo.isGameDay ? 'game-day-card' : ''}`}
+            data-index={i} data-src={`/images/${photo.src}`} data-caption={photo.caption}
             style={`transform: rotateY(${angle}deg) translateZ(${radius}px);`}>
             <img src={`/images/${photo.src}`} alt={photo.caption} loading="lazy" onerror="this.parentElement.style.display='none'" />
             <div class="card-title">{photo.caption}</div>
@@ -56,14 +56,13 @@ const radius = 520;
 <style>
   .carousel-scene {
     width: 100%; height: 600px;
-    perspective: 1400px; perspective-origin: 50% 40%;
+    perspective: 2200px; perspective-origin: 50% 40%;
     display: flex; align-items: center; justify-content: center;
     overflow: visible; position: relative;
   }
   .carousel-container {
     width: 220px; height: 340px;
-    position: relative;
-    transform-style: preserve-3d;
+    position: relative; transform-style: preserve-3d;
     transform: rotateX(8deg) rotateY(0deg);
   }
   .carousel-card {
@@ -77,6 +76,7 @@ const radius = 520;
   .carousel-card img {
     width: 100%; height: 80%; object-fit: cover; object-position: center top; display: block;
   }
+  .game-day-card img { object-position: center 15%; }
   .card-title {
     height: 20%; display: flex; align-items: center; justify-content: center;
     background: rgba(6,13,4,0.9); color: #8cd867;
@@ -99,13 +99,10 @@ const radius = 520;
   const lbCaption = document.getElementById('lightbox-caption');
   const lbClose = document.getElementById('lightbox-close');
   const total = cards.length;
-  const R = 520;
+  const R = 900;
 
   if (container && scene) {
-    let rotation = 0;
-    let velocity = 0;
-    let isDragging = false;
-    let lastX = 0;
+    let rotation = 0, velocity = 0, isDragging = false, lastX = 0;
 
     function updateCardDepth() {
       cards.forEach((card, i) => {
@@ -139,7 +136,6 @@ const radius = 520;
     animateCarousel();
   }
 
-  // Lightbox
   cards.forEach(card => {
     card.addEventListener('click', () => {
       if (lbImg) lbImg.src = card.getAttribute('data-src') || '';
