@@ -22,6 +22,9 @@ const socials = [
   <Nav />
   <CustomCursor />
 
+  <!-- LP coins background (same as homepage) -->
+  <div id="lp-coin-bg" style="position: absolute; top: 0; left: 0; width: 100%; z-index: 0; pointer-events: none; overflow: hidden;"></div>
+
   <main style="position: relative; z-index: 2; min-height: 100vh;">
     <!-- Follow The Journey -->
     <section class="site-section" id="social" style="min-height:100vh;display:flex;align-items:center;">
@@ -119,6 +122,11 @@ const socials = [
   @media (max-width:768px) { .social-grid-big { grid-template-columns:repeat(2,1fr); } }
   @media (max-width:480px) { .social-grid-big { grid-template-columns:1fr; } }
 </style>
+
+<script>
+  import { initFloatingCoins, initStardust } from '../scripts/particles';
+  document.addEventListener('DOMContentLoaded', () => { initFloatingCoins(); initStardust(); });
+</script>
 
 <script>
   // Copy link

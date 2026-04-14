@@ -106,6 +106,125 @@ export function initFloatingCoins() {
   animate();
 }
 
+// Green stardust particle system (Change 4)
+export function initStardust() {
+  const device = document.documentElement.getAttribute('data-device') || 'desktop';
+  const isMobile = device === 'mobile';
+  const particleCount = isMobile ? 600 : 2000;
+
+  const canvas = document.createElement('canvas');
+  canvas.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:2;pointer-events:none;will-change:transform;';
+  document.body.appendChild(canvas);
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; });
+
+  const colors = ['#5aba32','#8cd867','#3dd8c5','#4a8c2a','#aee87a'];
+
+  interface Dust {
+    x: number; y: number; size: number; opacity: number;
+    twinkleSpeed: number; twinkleOffset: number;
+    driftX: number; driftY: number; color: string;
+    isCursorSpark?: boolean; life?: number; maxLife?: number; vx?: number; vy?: number;
+  }
+
+  const particles: Dust[] = [];
+  for (let i = 0; i < particleCount; i++) {
+    particles.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      size: Math.random() * 2.2 + 0.3,
+      opacity: Math.random() * 0.7 + 0.1,
+      twinkleSpeed: Math.random() * 0.03 + 0.005,
+      twinkleOffset: Math.random() * Math.PI * 2,
+      driftX: (Math.random() - 0.5) * 0.15,
+      driftY: (Math.random() - 0.5) * 0.08,
+      color: colors[Math.floor(Math.random() * colors.length)],
+    });
+  }
+
+  // Cursor spark spawning (desktop only)
+  if (!isMobile) {
+    document.addEventListener('mousemove', (e) => {
+      for (let i = 0; i < 3; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = 1.5 + Math.random() * 1.5;
+        particles.push({
+          x: e.clientX, y: e.clientY,
+          size: 2 + Math.random() * 2,
+          opacity: 0.9,
+          twinkleSpeed: 0, twinkleOffset: 0,
+          driftX: 0, driftY: 0,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          isCursorSpark: true,
+          life: 0, maxLife: 800,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+        });
+      }
+    });
+  }
+
+  function hexToRGBA(hex: string, alpha: number) {
+    const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+    return `rgba(${r},${g},${b},${alpha})`;
+  }
+
+  function animate() {
+    requestAnimationFrame(animate);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const now = Date.now();
+
+    for (let i = particles.length - 1; i >= 0; i--) {
+      const p = particles[i];
+
+      if (p.isCursorSpark) {
+        p.life = (p.life || 0) + 16;
+        if (p.life >= (p.maxLife || 800)) { particles.splice(i, 1); continue; }
+        p.x += p.vx || 0;
+        p.y += p.vy || 0;
+        const fade = 1 - p.life / (p.maxLife || 800);
+        ctx.globalAlpha = p.opacity * fade;
+        ctx.fillStyle = p.color;
+        ctx.beginPath(); ctx.arc(p.x, p.y, p.size * fade, 0, Math.PI * 2); ctx.fill();
+      } else {
+        p.x += p.driftX;
+        p.y += p.driftY;
+        if (p.x < 0) p.x = canvas.width;
+        if (p.x > canvas.width) p.x = 0;
+        if (p.y < 0) p.y = canvas.height;
+        if (p.y > canvas.height) p.y = 0;
+
+        const twinkle = Math.sin(now * p.twinkleSpeed + p.twinkleOffset) * 0.5 + 0.5;
+        const alpha = p.opacity * twinkle;
+        ctx.globalAlpha = alpha;
+        ctx.fillStyle = p.color;
+        ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2); ctx.fill();
+
+        // Star shape for larger particles
+        if (p.size > 1.5) {
+          ctx.globalAlpha = alpha * 0.4;
+          ctx.strokeStyle = p.color;
+          ctx.lineWidth = 0.5;
+          const len = p.size * 3;
+          for (let a = 0; a < 4; a++) {
+            const angle = (Math.PI / 4) * a;
+            ctx.beginPath();
+            ctx.moveTo(p.x - Math.cos(angle) * len, p.y - Math.sin(angle) * len);
+            ctx.lineTo(p.x + Math.cos(angle) * len, p.y + Math.sin(angle) * len);
+            ctx.stroke();
+          }
+        }
+      }
+    }
+    ctx.globalAlpha = 1;
+  }
+  animate();
+}
+
 // Cursor green spark flares (disabled on mobile)
 export function initCursorSparks() {
   const device = document.documentElement.getAttribute('data-device') || 'desktop';

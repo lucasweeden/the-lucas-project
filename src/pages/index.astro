@@ -40,12 +40,13 @@ import Footer from '../components/Footer.astro';
 </Layout>
 
 <script>
-  import { initFloatingCoins, initCursorSparks } from '../scripts/particles';
+  import { initFloatingCoins, initCursorSparks, initStardust } from '../scripts/particles';
   import { initAnimations } from '../scripts/animations';
 
   document.addEventListener('DOMContentLoaded', () => {
     initFloatingCoins();
     initCursorSparks();
+    initStardust();
     initAnimations();
   });
 </script>
