@@ -790,10 +790,10 @@ img { max-width: 100%; height: auto; display: block; }
 .float-anim { animation: floatBob 3s ease-in-out infinite; }
 @keyframes floatBob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
 
-.limitless-logo-wrap {
+.brand-logo-wrap {
   display: flex; align-items: center; justify-content: center;
 }
-.limitless-logo-wrap img {
+.brand-logo-wrap img {
   width: 280px; height: auto;
   filter: drop-shadow(0 0 30px rgba(90,186,50,0.3));
 }

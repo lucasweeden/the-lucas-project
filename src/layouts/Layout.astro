@@ -1,8 +1,12 @@
 ---
 interface Props {
   title?: string;
+  canonical?: string;
 }
-const { title = "Lucas Weeden — Builder · Operator · Creator" } = Astro.props;
+const {
+  title = "Lucas Weeden — Builder · Operator · Creator",
+  canonical = "https://lucasweeden.com",
+} = Astro.props;
 ---
 <!doctype html>
 <html lang="en" data-theme="dark">
@@ -13,9 +17,9 @@ const { title = "Lucas Weeden — Builder · Operator · Creator" } = Astro.prop
   <meta name="description" content="The Lucas Project — documenting the real-time build of businesses, brands, and a life lived wide open. $10M+ in sales, AI pivot, and always building." />
   <meta property="og:title" content="Lucas Weeden — The Lucas Project" />
   <meta property="og:description" content="Builder. Operator. Creator. It's about that time." />
-  <meta property="og:url" content="https://lucasweeden.com" />
+  <meta property="og:url" content={canonical} />
   <meta property="og:type" content="website" />
-  <link rel="canonical" href="https://lucasweeden.com" />
+  <link rel="canonical" href={canonical} />
   <link rel="icon" type="image/png" href="/images/smallLucas_Project_Logo.png" />
   <link rel="preload" href="/images/IMG_1530.jpeg" as="image" />
   <!-- Preload carousel images so they appear instantly on mobile -->
